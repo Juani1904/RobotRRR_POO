@@ -1,0 +1,4 @@
+#Aca ponemos los archivos o carpetas que queramos ignorar para hacer los commits de git
+
+#Ignora carpeta UML
+UML
