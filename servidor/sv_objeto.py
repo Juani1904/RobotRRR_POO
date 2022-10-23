@@ -37,9 +37,31 @@ class RobotRRR:
         self.Arduino.close()
 
     #Para abrir o cerrar la pinza (gripper)
-   # def setPinza(self,estado):
+    def setPinza(self,estado=False): #Falso por defecto
         
-        #if (estado==True):
+        if (estado==True):
+            self.Arduino.write(b"M3")
+        else:
+            self.Arduino.write(b"M5")
+        time.sleep(2)
+        while(self.Arduino.in_waiting()>0): 
+            return self.Arduino.readline()
+    
+    def movLineal(self,coordX,coordY,coordZ,velocidad):
+        
+        self.Arduino.write(bytes("g1x"+coordX+"y"+coordY+"z"+coordZ+"e"+velocidad,encoding='utf-8'))
+        time.sleep(2)
+        while(self.Arduino.in_waiting()>0): 
+            return self.Arduino.readline()
+    
+    def movReset(self):
+        #Primero establecemos modo de coordenadas absolutas por las dudas
+        self.Arduino.write(b"G90")
+        #Ahora lo llevamos a la posicion de origen
+        self.Arduino.write(b"g1x0y0z0e10") #Por defecto le asignamos una velocidad de 10mm/s
+        
+
+        
             
 
         
