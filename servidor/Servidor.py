@@ -5,7 +5,7 @@ from threading import Thread
 # Basicamente es el que va a estar bloqueandose o esperando (en estado de escucha) a que un objeto se conecte
 import socket
 # El socket me va a permitir establecer el cinculo entre la aplicacion cliente (C++) y la aplicacion servidora (Python)
-
+from sv_consola import Consola
 # La clase que vamos a definir ahora hace de interfaz entre el cliente y el servicio (en nuestro caso cliente y framework de Arduino)
 
 
@@ -15,29 +15,29 @@ class Servidor(object):
     Como servidor no se ha especificado a ninguno en particular, porque en el lanzamiento (instanciacion
     de self.server) le pasaremos todo
     """
-    puerto = 8891  # Definimos un puerto. Puede ser cualquiera, simpre y cuando este libre en el host
-
+    defaultPort = 8891  # Definimos un puerto. Puede ser cualquiera, simpre y cuando este libre en el host
+    ejecutar=Consola()
     # Definimos el constructor
-    def __init__(self, miRobot, puerto):
+    def __init__(self, miRobot, mipuerto=defaultPort): #Por defecto se establece puerto 
         # Con self.objeto_vinculado establecemnos la relacion entre la interfaz y el servicio. En este caso el framework de Arduino
         self.Robot = miRobot
-        self.puerto_usado = puerto
+        self.puerto = mipuerto
         while True:
             try:
                 """Creacion del servidor indicando el puerto deseado. Es importante esta instanciacion
                 del objeto self.server, debido a que es la que me crea el vinculo entre mi clase
                 interfaz XmlRpcEjemploserver con el servidor propiamente dicho (clase servidor SimpleXMLRPCServer)
                 """
-                self.server = SimpleXMLRPCServer(("localhost", self.puerto_usado), allow_none=True)
-                if self.puerto_usado != puerto:
+                self.server = SimpleXMLRPCServer(("localhost", self.puerto), allow_none=True)
+                if self.puerto != mipuerto:
                     print(
-                        "Servidor RPC ubicado en puerto no estandar [%d]" % self.puerto_usado)
+                        "Servidor RPC ubicado en puerto no estandar [%d]" % self.puerto)
                 break
-
+            #En el caso de que el puerto usado este ocupado (error 98), pasamos al siguiente, si no indicamos que no puede iniciarse el servidor
             except socket.error as e:
 
                 if e.errno == 98:
-                    self.puerto_usado += 1
+                    self.puerto += 1
                     continue
                 else:
                     print("El servidor RPC no puede ser iniciado")
@@ -45,14 +45,14 @@ class Servidor(object):
 
         """# Se registra cada funcion que realiza el servicio (robot)
         # Los nombres que pongamos entre "" son con los que voy a tener que llamar a la funcion en mi
-        codigo cliente. Pueden diferir estos a como estan referenciados en "rpc_objetos.py"
+        codigo cliente. Pueden diferir estos a como estan referenciados en "sv_robot.py"
         # Luego los nombres do_saludar y do_calcular vienen de los metodos que vamos a definir mas
         abajo, junto con run_server y shutdown
         """
         #Cuando alguien en el cliente llame a la funcion saludar1, en el servidor se ejecutara el 
         # metodo do_saludar, lo mismo para do_calcular
-        self.server.register_function(self.do_saludar, "saludar1")
-        self.server.register_function(self.do_calcular, "calcular1")
+        self.server.register_function(self.ejecutar.do_posicion, "posicion")
+        #self.server.register_function(self.do_calcular, "calcular1")
         
         # Se lanza el servidor en un hilo de control mediante Thread
 

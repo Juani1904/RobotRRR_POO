@@ -7,11 +7,12 @@ import serial
 import time
 
 
+
 #Inicio de definicion de clase RobotRRR
 
 class RobotRRR:
     
-    Arduino=serial.Serial("/dev/ttyUSB1",115200,timeout=0) #timeout es el tiempo de respuesta en segundos
+    Arduino=serial.Serial("/dev/ttyUSB0",115200,timeout=0) #timeout es el tiempo de respuesta en segundos
     Arduino.close() #Para que por defecto se encuentre cerrado
     #Definimos los metodos del robot
 
