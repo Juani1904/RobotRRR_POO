@@ -21,10 +21,20 @@ int main(){
     /*Llamamos a la funcion saludar1 del servidor, para ello vamos a utilizar la clase XmlRpcValue
     para establecer los argumentos que vamos a enviar. Luego con el metodo exectute que pertenece
     a la clase XmlRpcClient mandamos al sv la peticion */
-    XmlRpcValue OneArg,result;
-    OneArg[0]="Juani";
-    Cliente.execute("saludar1",OneArg,result);
-    cout<<result<<"\n\n";
+    XmlRpcValue noArg,result1;
+    Cliente.execute("habilitarpuerto",noArg,result1);
+    cout<<result1<<"\n\n";
+
+/*
+    XmlRpcValue coord,result2;
+   coord[0]=1;
+   coord[1]=2;
+   coord[2]=3;
+   coord[3]=10;
+    Cliente.execute("posicion",coord,result2);
+    cout<<result2<<"\n\n";
+*/
+    
     
 
 

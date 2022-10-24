@@ -5,7 +5,6 @@ from threading import Thread
 # Basicamente es el que va a estar bloqueandose o esperando (en estado de escucha) a que un objeto se conecte
 import socket
 # El socket me va a permitir establecer el cinculo entre la aplicacion cliente (C++) y la aplicacion servidora (Python)
-from sv_consola import Consola
 # La clase que vamos a definir ahora hace de interfaz entre el cliente y el servicio (en nuestro caso cliente y framework de Arduino)
 
 
@@ -15,13 +14,14 @@ class Servidor(object):
     Como servidor no se ha especificado a ninguno en particular, porque en el lanzamiento (instanciacion
     de self.server) le pasaremos todo
     """
-    defaultPort = 8891  # Definimos un puerto. Puede ser cualquiera, simpre y cuando este libre en el host
-    ejecutar=Consola()
+    puertoRPC = 8891  # Definimos un puerto. Puede ser cualquiera, simpre y cuando este libre en el host
+    
     # Definimos el constructor
-    def __init__(self, miRobot, mipuerto=defaultPort): #Por defecto se establece puerto 
+    def __init__(self, Robot, port=puertoRPC): #Por defecto se establece puerto 
         # Con self.objeto_vinculado establecemnos la relacion entre la interfaz y el servicio. En este caso el framework de Arduino
-        self.Robot = miRobot
-        self.puerto = mipuerto
+        self.Robot = Robot
+        self.puerto = port
+        
         while True:
             try:
                 """Creacion del servidor indicando el puerto deseado. Es importante esta instanciacion
@@ -29,9 +29,8 @@ class Servidor(object):
                 interfaz XmlRpcEjemploserver con el servidor propiamente dicho (clase servidor SimpleXMLRPCServer)
                 """
                 self.server = SimpleXMLRPCServer(("localhost", self.puerto), allow_none=True)
-                if self.puerto != mipuerto:
-                    print(
-                        "Servidor RPC ubicado en puerto no estandar [%d]" % self.puerto)
+                if self.puerto != port:
+                    print("Servidor RPC ubicado en puerto no estandar [%d]" % self.puerto)
                 break
             #En el caso de que el puerto usado este ocupado (error 98), pasamos al siguiente, si no indicamos que no puede iniciarse el servidor
             except socket.error as e:
@@ -42,7 +41,6 @@ class Servidor(object):
                 else:
                     print("El servidor RPC no puede ser iniciado")
                     raise
-
         """# Se registra cada funcion que realiza el servicio (robot)
         # Los nombres que pongamos entre "" son con los que voy a tener que llamar a la funcion en mi
         codigo cliente. Pueden diferir estos a como estan referenciados en "sv_robot.py"
@@ -51,7 +49,8 @@ class Servidor(object):
         """
         #Cuando alguien en el cliente llame a la funcion saludar1, en el servidor se ejecutara el 
         # metodo do_saludar, lo mismo para do_calcular
-        self.server.register_function(self.ejecutar.do_posicion, "posicion")
+        self.server.register_function(self.do_posicion, "posicion")
+        self.server.register_function(self.do_puertoserie_on,"habilitarpuerto")
         #self.server.register_function(self.do_calcular, "calcular1")
         
         # Se lanza el servidor en un hilo de control mediante Thread
@@ -81,14 +80,18 @@ class Servidor(object):
         self.thread.join()
 
     #Metodo para calcular.
-    def do_calcular(self, prim=2, seg=5):
+   # def do_calcular(self, prim=2, seg=5):
         # Funcion/servicio: sumar 2 numeros
-        return self.Robot.calcular(prim, seg)
+        #return self.Robot.calcular(prim, seg)
     """El cliente envia la peticion de llamar a la funcion calcular1 al servidor. Luego el servidor
     internamente llama a la funcion do_calcular. Luego vemos que esta funcion o metodo do_calcular
     retorna el metodo calcular() del objetoX."""
 
     #Metodo para saludar
-    def do_saludar(self, quien='Programador'):
+    def do_posicion(self,coordX,coordY,coordZ,velocidad):
         # Funcion/servicio: mensaje al argumento provisto
-        return self.Robot.saludar(quien)
+        return self.Robot.movLineal(coordX,coordY,coordZ,velocidad)
+
+    def do_puertoserie_on(self):
+        
+        return self.Robot.hola()

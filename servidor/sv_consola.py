@@ -10,26 +10,27 @@ class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
     doc_header= "Guia de comandos documentados (ingrese help <comando> para obtener ayuda sobre el ingreso de dicho comando)"
 
     #Ahora ingresamos todas las funciones que queremos que tenga
-    def do_puertoserie_on(self):
+    def do_puertoserie_on(self,arg):
         'Habilita puerto serie: puertoserie_on'
-        self.Robot.turnSVON()
+        return self.Robot.turnSVON()
 
-    def do_puertoserie_off(self):
+    def do_puertoserie_off(self,arg):
         'Deshabilita puerto serie: puertoserie_off'
-        self.Robot.turnSVOFF()
+        return self.Robot.turnSVOFF()
 
-    def do_estadopinza(self,estado):
+    def do_estadopinza(self,arg):
         'Habilitacion de pinza/gripper: estadopinza True/False'
-        self.Robot.setPinza(estado)
+        return self.Robot.setPinza(arg)
 
-    def do_posicion(self,coordX,coordY,coordZ,velocidad):
+    def do_posicion(self,arg):
         'Establece las nuevas coordenadas absolutas del robot: posicion 1 2 3 10'
-        self.Robot.movLineal(coordX,coordY,coordZ,velocidad)
+        return self.Robot.movLineal(arg)
     
-    def do_Reset(self):
+    def do_reset(self,arg):
         'Resetea al RobotRRR a su posicion inicial: reset'
-        self.Robot.movReset()
+        return self.Robot.movReset()
     
     def precmd(self,args):
         args=args.lower()
         return(args)
+
