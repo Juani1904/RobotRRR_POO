@@ -5,6 +5,8 @@
 
 from Servidor import Servidor
 from sv_robot import RobotRRR
+from sv_consola import Consola
+import time
 
 #Aca lo que vamos a hacer es instanciar o constuir el objeto objeto_vinculado, y se lo pasaremos como
 #parametro a la instanciacion del objeto servidor. De esta forma mediante este modulo de lanzamiento
@@ -12,5 +14,11 @@ from sv_robot import RobotRRR
 if __name__=="__main__":
 
     objeto_vinculado=RobotRRR()
-    servidor =Servidor(objeto_vinculado)
-   
+    consola=Consola()
+    servidor =Servidor(objeto_vinculado,consola)
+    time.sleep(2)
+    consola.cmdloop()
+
+
+
+    

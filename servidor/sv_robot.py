@@ -13,32 +13,23 @@ import time
 class RobotRRR:
 
 
-    def __init__(self):
-    
-        self.Arduino=serial.Serial("/dev/ttyUSB0",115200,timeout=0) #timeout es el tiempo de respuesta en segundos
-        #self.Arduino.close() #Para que por defecto se encuentre cerrado
-        #Definimos los metodos del robot
 
     #Para abrir el puerto serie para la conexion con Arduino por puerto serie
-    def turnSVON(self):
+    def turnONPort(self):
         
-        #self.Arduino.open()
-        #Aca tambien vamos a hacer el homing del robot
-        #self.Arduino.write(b"G28") #Ponemos la b porque el metodo solo acepta como param. tipos de dato "bytes"
-        #time.sleep(2) #Colocamos un tiempo de 2s para que demos tiempo al robot a reaccionar y enviarnos info
-        """
-        El metodo in_wating me entrega el numero de bytes esperando en el puerto serie para ser recibidos
-        por nosotros. Si es mayor a cero (hay mensajes esperando para entrar), le decimos al metodo que retorne
-        lo que lee
-        """
-        #while(self.Arduino.inWaiting()>0): 
-        return self.Arduino.readline()
-
+        self.Arduino=serial.Serial("/dev/ttyUSB1",115200,timeout=1) #timeout es el tiempo de respuesta en segundos
+        time.sleep(2)
+        while(self.Arduino.in_waiting>0): 
+            return self.Arduino.readlines()
+        
+        
 
     #Para abrir el puerto serie para la conexion con Arduino por puerto serie
-    def turnSVOFF(self):
+    def turnOFFPort(self):
 
         self.Arduino.close()
+        time.sleep(2)
+        return "INFO: ROBOT OFFLINE"
 
     #Para abrir o cerrar la pinza (gripper)
     def setPinza(self,estado=False): #Falso por defecto
@@ -48,8 +39,9 @@ class RobotRRR:
         else:
             self.Arduino.write(b"M5")
         time.sleep(2)
-        while(self.Arduino.in_waiting()>0): 
-            return self.Arduino.readline()
+
+        if(self.Arduino.in_waiting>0): 
+            return self.Arduino.readlines()
     
     def movLineal(self,coordX,coordY,coordZ,velocidad):
         
@@ -63,12 +55,9 @@ class RobotRRR:
         self.Arduino.write(b"G90")
         #Ahora lo llevamos a la posicion de origen
         self.Arduino.write(b"g1x0y0z0e10") #Por defecto le asignamos una velocidad de 10mm/s
-    def hola(self):
-        return "hola"
         
 
         
-            
 
         
 

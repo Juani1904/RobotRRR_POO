@@ -7,7 +7,6 @@ import socket
 # El socket me va a permitir establecer el cinculo entre la aplicacion cliente (C++) y la aplicacion servidora (Python)
 # La clase que vamos a definir ahora hace de interfaz entre el cliente y el servicio (en nuestro caso cliente y framework de Arduino)
 
-
 class Servidor(object):
     server = None
     """
@@ -17,11 +16,11 @@ class Servidor(object):
     puertoRPC = 8891  # Definimos un puerto. Puede ser cualquiera, simpre y cuando este libre en el host
     
     # Definimos el constructor
-    def __init__(self, Robot, port=puertoRPC): #Por defecto se establece puerto 
+    def __init__(self, Robot,Consola, port=puertoRPC): #Por defecto se establece puerto 
         # Con self.objeto_vinculado establecemnos la relacion entre la interfaz y el servicio. En este caso el framework de Arduino
         self.Robot = Robot
         self.puerto = port
-        
+        self.consola=Consola
         while True:
             try:
                 """Creacion del servidor indicando el puerto deseado. Es importante esta instanciacion
@@ -46,27 +45,25 @@ class Servidor(object):
         codigo cliente. Pueden diferir estos a como estan referenciados en "sv_robot.py"
         # Luego los nombres do_saludar y do_calcular vienen de los metodos que vamos a definir mas
         abajo, junto con run_server y shutdown
-        """
-        #Cuando alguien en el cliente llame a la funcion saludar1, en el servidor se ejecutara el 
-        # metodo do_saludar, lo mismo para do_calcular
-        self.server.register_function(self.do_posicion, "posicion")
-        self.server.register_function(self.do_puertoserie_on,"habilitarpuerto")
-        #self.server.register_function(self.do_calcular, "calcular1")
-        
+        """ 
+       
+        self.server.register_function(self.do_turnONPort,"habilitarpuerto")
+        self.server.register_function(self.do_turnOFFPort,"deshabilitarpuerto")
         # Se lanza el servidor en un hilo de control mediante Thread
 
         """*target* is the callable object to be invoked by the run()
         method. Defaults to None, meaning nothing is called. En este caso el run method
         sera run_server y lo creamos a continuacion de esto"""
-
+        #if (self.consola.do_svstatus()):
         self.thread = Thread(target=self.run_server) #Instanciamos el objeto thead
 
         self.thread.start() #Utilizamos atributo start() del objeto thread
 
-        print("Servidor RPC iniciado en el puerto [%s]" % str(
-            self.server.server_address))
+        print("Servidor RPC iniciado en el puerto [%s]" % str(self.server.server_address))
 
-    #Ahora definimos algunos otros metodos que tendra mi clase XmlEjemploServer
+        
+
+    #Ahora definimos algunos otros metodos que tendra mi clase Servidor
 
     #Metodo para iniciar el servidor
     def run_server(self):
@@ -80,18 +77,14 @@ class Servidor(object):
         self.thread.join()
 
     #Metodo para calcular.
-   # def do_calcular(self, prim=2, seg=5):
-        # Funcion/servicio: sumar 2 numeros
-        #return self.Robot.calcular(prim, seg)
-    """El cliente envia la peticion de llamar a la funcion calcular1 al servidor. Luego el servidor
-    internamente llama a la funcion do_calcular. Luego vemos que esta funcion o metodo do_calcular
-    retorna el metodo calcular() del objetoX."""
-
-    #Metodo para saludar
-    def do_posicion(self,coordX,coordY,coordZ,velocidad):
-        # Funcion/servicio: mensaje al argumento provisto
-        return self.Robot.movLineal(coordX,coordY,coordZ,velocidad)
-
-    def do_puertoserie_on(self):
+  
+    #Metodo para habilitar el puerto serie
+   
+    def do_turnONPort(self):
+         
+        return self.consola.do_turnonport()
+    
+    def do_turnOFFPort(self):
         
-        return self.Robot.hola()
+        return self.consola.do_turnoffport()
+
