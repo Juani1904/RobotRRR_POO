@@ -55,11 +55,11 @@ class Servidor(object):
         method. Defaults to None, meaning nothing is called. En este caso el run method
         sera run_server y lo creamos a continuacion de esto"""
         #if (self.consola.do_svstatus()):
-        self.thread = Thread(target=self.run_server) #Instanciamos el objeto thead
+        #self.thread = Thread(target=self.run_server) #Instanciamos el objeto thead
 
-        self.thread.start() #Utilizamos atributo start() del objeto thread
+        #self.thread.start() #Utilizamos atributo start() del objeto thread
 
-        print("Servidor RPC iniciado en el puerto [%s]" % str(self.server.server_address))
+        #print("Servidor RPC iniciado en el puerto [%s]" % str(self.server.server_address))
 
         
 

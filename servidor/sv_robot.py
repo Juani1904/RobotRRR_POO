@@ -16,11 +16,20 @@ class RobotRRR:
 
     #Para abrir el puerto serie para la conexion con Arduino por puerto serie
     def turnONPort(self):
-        
-        self.Arduino=serial.Serial("/dev/ttyUSB1",115200,timeout=1) #timeout es el tiempo de respuesta en segundos
-        time.sleep(2)
-        while(self.Arduino.in_waiting>0): 
-            return self.Arduino.readlines()
+        #Con esta excepcion, si no se puede abrir el puerto serie, se intenta cambiar el num del USB, si no se avisa que no se pudo abrir el puerto 
+        try:
+            self.Arduino=serial.Serial("/dev/ttyUSB0",115200,timeout=1) #timeout es el tiempo de respuesta en segundos
+            time.sleep(2)
+            while(self.Arduino.in_waiting>0): 
+                return self.Arduino.readlines()
+        except FileNotFoundError as e:
+            if e.errno == 2:
+                self.Arduino=serial.Serial("/dev/ttyUSB1",115200,timeout=1)
+                
+            else:
+                print("ERROR: Conecte Arduino nuevamente")
+                raise #Con raise terminamos el codigo ahi
+
         
         
 

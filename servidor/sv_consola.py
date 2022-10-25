@@ -1,5 +1,7 @@
 from cmd import Cmd
 from sv_robot import RobotRRR
+from threading import Thread
+from xmlrpc.server import SimpleXMLRPCServer
 class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
     controlRobot=RobotRRR()
     #Los "atributos" que vamos a setear aca son realmente metodos de la clase Cmd (ejemplo Cmd.intro(string))
@@ -8,15 +10,30 @@ class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
     file=None
     doc_header= "Guia de comandos documentados (ingrese help <comando> para obtener ayuda sobre el ingreso de dicho comando)"
 
-    #Ahora ingresamos todas las funciones que queremos que tenga
-    
-    def do_svstatus(self,estado=False): #Falso por defecto
-        'Activar el servidor: svstatus on/off'
-        if (estado=="on"):
-            return True
-        elif (estado=="off"):
-            return False
 
+    #Ahora ingresamos todas las funciones que queremos que tenga
+    def agregarSV(self,servidor):
+        self.servidor=servidor
+    
+    
+
+    def do_svstatus_switch(self,estado):
+        if estado =="on":
+            self.servidor.thread = Thread(target=self.servidor.run_server) #Instanciamos el objeto thead
+            self.servidor.thread.start() #Utilizamos atributo start() del objeto thread
+            print("Servidor RPC iniciado en el puerto [%s]" % str(self.servidor.server.server_address))
+        elif estado =="off" and self.servidor is not None:
+            self.servidor.shutdown()
+            print("Servidor RPC en el puerto [%s] fue cerrado" % str(self.servidor.server.server_address))
+    
+    def run_server(self):
+        
+        self.servidor.serve_forever()
+
+    def shutdown(self):
+        
+        self.servidor.shutdown()
+        self.thread.join()
         
 
     def do_turnonport(self,arg=None):

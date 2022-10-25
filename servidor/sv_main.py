@@ -16,6 +16,7 @@ if __name__=="__main__":
     objeto_vinculado=RobotRRR()
     consola=Consola()
     servidor =Servidor(objeto_vinculado,consola)
+    consola.agregarSV(servidor)
     time.sleep(2)
     consola.cmdloop()
 
