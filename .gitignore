@@ -2,7 +2,7 @@
 
 #Ignora carpetas
 UML
-.ipynb_checkpoints
+
 
 #Ignora el archivo de prueba de la libreria cmd
 prueba.py
