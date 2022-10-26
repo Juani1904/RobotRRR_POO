@@ -1,10 +1,5 @@
 from cmd import Cmd
-"""
-A tener en cuenta al usar el modulo Cmd. Cuando declaramos las funciones do_XXX, estas deben
-tener como parametro obligatorio self y SIEMPRE tener un argumento, al que podemos llamar arg o args
-(o de cualquier forma). Esto es asi porque el modulo Cmd, cuando llama a las funciones do_XXX, interpreta
-al comando en si mismo (por ejemplo turnonport) como un argumento en si mismo.
-"""
+import os
 from threading import Thread
 from xmlrpc.server import SimpleXMLRPCServer
 import time
@@ -13,7 +8,7 @@ class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
     #Los "atributos" que vamos a setear aca son realmente metodos de la clase Cmd (ejemplo Cmd.intro(string))
     intro=""
     prompt="V>>"
-    file=None
+    file=None #Atributo para guardar el archivo de comandos
     doc_header= "Ingrese help <comando> para obtener ayuda sobre el ingreso de dicho comando"
 
     def __init__(self,controlRobot):
@@ -39,8 +34,6 @@ class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
             print("Servidor RPC en el puerto [%s] fue cerrado" % str(self.servidor.server.server_address))
     
     
-        
-
     def do_turnonport(self,arg=None):
         'Activar el puerto serie: TURNONPORT'
         mensaje=""
@@ -61,9 +54,19 @@ class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
         
         return mensaje
 
-    def do_estadopinza(self,arg):
-        'Habilitacion de pinza/gripper: estadopinza True/False'
-        return self.controlRobot.setPinza(arg)
+    
+    
+    
+
+    def do_setpinza(self,estado):
+        'Habilitacion de pinza/gripper: estadopinza on/off'
+        mensaje=""
+        listamensaje=self.controlRobot.setPinza(estado)
+        for elemento in listamensaje:
+            mensaje_decoded=elemento.decode('UTF-8')
+            mensaje+=mensaje_decoded
+        return mensaje
+        
 
     def do_posicion(self,arg):
         'Establece las nuevas coordenadas absolutas del controlRobot: posicion 1 2 3 10'
@@ -75,14 +78,50 @@ class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
 
     def do_exit(self,arg):
         'Salir de la consola: EXIT'
+        self.cerrarArchivo() #Cerramos archivo de modo manual
         print("Saliendo de la consola...")
         time.sleep(1)
         sys.exit()
-    #Funciones para el manejo de la consola
+
+
+
+    #Metodos para la construccion y apertura de archivos de comandos
+    def modoManual(self, archivo):
+        self.file = open(archivo, 'w')
+
+    def modoAutomatico(self, archivo):
+        #El modo automatico solo sera valido cuando el archivo de comandos exista, y cuando no este vacio
+        #Si no se entrara directamente a modo manual
+        try:
+            with open(archivo) as f:
+                self.cmdqueue.extend(f.read().splitlines())
+        except FileNotFoundError as e:
+            if e.errno==2:
+                print("Archivo no encontrado.Entra a modo manual")
+                print("Ingrese NOMBRE del archivo .txt que contiene los comandos: ", end="")
+                archivonuevo=input()+".txt"
+                self.modoManual(archivonuevo)
+        except os.stat(archivo).st_size==0:
+            print("Archivo vacio. Entra a modo manual")
+            print("Ingrese NOMBRE del archivo .txt que contiene los comandos: ", end="")
+            archivonuevo=input()+".txt"
+            self.modoManual(archivonuevo)
+    
+    def cerrarArchivo(self):
+        if self.file: #Si el archivo existe, entrega un valor booleano True, si no tira False
+            self.file.close()
+            self.file = None
+
+
+
+    #Metodos para el manejo de la consola
 
     #Este precmd me convierte los comandos ingresados a minusculas para que no haya problemas con mayusculas
     def precmd(self, line):
-        return line.lower()
+        line=line.lower()
+        if self.file and 'modoAutomatico' not in line:
+            print(line, file=self.file)
+        return line
 
     #Este postcmd me permite que funciones do_.. que tengan un return no me lleven a un loop infinito en la consola IU Server
     def postcmd(self, stop, line):
@@ -96,7 +135,7 @@ class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
     def preloop(self):
         #Creamos una pequeña animacion para el servidor antes de que se inicie
 
-        """ HABILITAR AL TERMINAR CODIGO
+         #HABILITAR AL TERMINAR CODIGO
         print("Iniciando...")
         time.sleep(1)
         for i in range(0,101):
@@ -104,9 +143,21 @@ class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
             print("Cargando consola IU Server...[%d%%]" % i, end="\r")
         print("Cargando consola IU Server...[100%]")
         time.sleep(0.5)
-        """
+        
         print("\n\n**********Bienvenido a Veneris Server ®**********\n")
         time.sleep(0.5)
+        print("Ingrese el modo de trabajo: Manual o Automatico(M/A): ", end="")
+        modo=input()
+        if modo=="M":
+            print("Ingrese NOMBRE del archivo .txt a crear con los comandos: ", end="")
+            archivo=input()+".txt"
+            self.modoManual(archivo)
+            pass
+        elif modo=="A":
+            print("Ingrese NOMBRE del archivo .txt que contiene los comandos: ", end="")
+            archivo=input()+".txt"
+            self.modoAutomatico(archivo)
+            pass
         print("Lista de comandos disponibles:")
         time.sleep(0.5)
         self.do_help(None)

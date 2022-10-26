@@ -46,6 +46,7 @@ class Servidor(object):
         self.server.register_function(self.do_turnONPort,"habilitarpuerto")
         self.server.register_function(self.do_turnOFFPort,"deshabilitarpuerto")
         self.server.register_function(self.do_setMotores,"setmotores")
+        self.server.register_function(self.do_setPinza,"setpinza")
 
      
 
@@ -73,4 +74,8 @@ class Servidor(object):
     def do_setMotores(self,estado):
 
         return self.consola.do_setmotores(estado)
+    
+    def do_setPinza(self,estado):
+
+        return self.consola.do_setpinza(estado)
 

@@ -52,14 +52,13 @@ class RobotRRR:
 
 
     #Para abrir o cerrar la pinza (gripper) [Actividad del efector final]
-    def setPinza(self,estado=False): #Falso por defecto
+    def setPinza(self,estado="off"): #Falso por defecto
         
-        if (estado==True):
+        if (estado=="on"):
             self.Arduino.write(b"M3")
-        else:
+        elif (estado=="off"):
             self.Arduino.write(b"M5")
         time.sleep(2)
-
         if(self.Arduino.in_waiting>0): 
             return self.Arduino.readlines()
     

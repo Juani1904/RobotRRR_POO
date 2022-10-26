@@ -1,0 +1,15 @@
+help color
+color blue
+help foward
+foward
+help forward
+help forward
+help forward
+help forward forward 30
+forward 30
+help right
+right 40
+forward 60
+help goto
+goto 100 300
+bye
