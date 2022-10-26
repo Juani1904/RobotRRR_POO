@@ -1,9 +1,10 @@
 from cmd import Cmd
 import os
 from threading import Thread
-from xmlrpc.server import SimpleXMLRPCServer
 import time
 import sys
+from types import NoneType
+import serial
 class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
     #Los "atributos" que vamos a setear aca son realmente metodos de la clase Cmd (ejemplo Cmd.intro(string))
     intro=""
@@ -36,12 +37,18 @@ class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
     
     def do_turnonport(self,arg=None):
         'Activar el puerto serie: TURNONPORT'
-        mensaje=""
-        listamensaje=self.controlRobot.turnONPort()
-        for elemento in listamensaje:
-            mensaje_decoded=elemento.decode('UTF-8')
-            mensaje+=mensaje_decoded
-        return mensaje
+        try:
+            mensaje=""
+            listamensaje=self.controlRobot.turnONPort()
+            for elemento in listamensaje:
+                mensaje_decoded=elemento.decode('UTF-8')
+                mensaje+=mensaje_decoded
+            return mensaje
+        #Ahora, en la excepcion, si objeto Arduino ya fue instanciado, entonces se avisa que el puerto ya esta abierto
+        except serial.serialutil.SerialException as e:
+            print("El puerto seria ya se encuentra abierto")
+            return "El puerto seria ya se encuentra abierto"  
+            
 
     def do_turnoffport(self,arg=None):
         'Deshabilita puerto serie: TURNOFFPORT'
@@ -52,13 +59,68 @@ class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
         "Activacion/Desactivacion de los motores del robot: SETMOTORES ON/OFF"
         try:
             mensaje=self.controlRobot.setMotores(estado)
-        
             return mensaje
-        except AttributeError as e:
-            print("Primero debe encender el puerto serie") #Para que lo muestre en CLI de servidor
-            return "Primero debe encender el puerto serie" #Para que lo muestre en el cliente
-
+        except serial.serialutil.PortNotOpenError as e:
+            print("El puerto serie no se encuentra abierto.Ejecute TURNONPORT")
+            return "El puerto serie no se encuentra abierto"
+        except Exception:
+            print("Error en el comando ingresado")
+            return "Error en el comando ingresado"
     
+    def do_setangularmotor1(self,parametros):
+        'Setear velocidad, sentido y angulo del motor1: SETANGULARMOTOR1 VEL(num) HOR/ANTH(str) ANG(num)' 
+        try:
+            velocidad,sentido,angulo=parametros.split()
+            return self.controlRobot.setAngularMotor1(velocidad,sentido,angulo)
+        except serial.serialutil.PortNotOpenError as e:
+            print("El puerto serie no se encuentra abierto.Ejecute TURNONPORT")
+            return "El puerto serie no se encuentra abierto"
+        except Exception:
+            print("Error en el comando ingresado")
+            return "Error en el comando ingresado"
+    
+    def do_setangularmotor2(self,parametros):
+        'Setear velocidad, sentido y angulo del motor2: SETANGULARMOTOR2 VEL(num) HOR/ANTH(str) ANG(num)'
+        try:
+            velocidad,sentido,angulo=parametros.split()
+            return self.controlRobot.setAngularMotor2(velocidad,sentido,angulo)
+        except serial.serialutil.PortNotOpenError as e:
+            print("El puerto serie no se encuentra abierto.Ejecute TURNONPORT")
+            return "El puerto serie no se encuentra abierto"
+        except Exception:
+            print("Error en el comando ingresado")
+            return "Error en el comando ingresado"
+    
+    def do_setangularmotor3(self,parametros):
+        'Setear velocidad, sentido y angulo del motor3: SETANGULARMOTOR3 VEL(num) HOR/ANTH(str) ANG(num)'
+        try:
+            velocidad,sentido,angulo=parametros.split()
+            return self.controlRobot.setAngularMotor3(velocidad,sentido,angulo)
+        except serial.serialutil.PortNotOpenError as e:
+            print("El puerto serie no se encuentra abierto.Ejecute TURNONPORT")
+            return "El puerto serie no se encuentra abierto"
+        except Exception:
+            print("Error en el comando ingresado")
+            return "Error en el comando ingresado"
+
+    def do_setposicionlineal(self,parametros):
+        'Setear posicion y velocidad del robot: SETPOSICIONLINEAL X Y Z VEL'
+        try:
+            coordX,coordY,coordZ,velocidad=parametros.split()
+            mensaje=""
+            listamensaje=self.controlRobot.setPosicionLineal(coordX,coordY,coordZ,velocidad)
+            for elemento in listamensaje:
+                mensaje_decoded=elemento.decode('UTF-8')
+                mensaje+=mensaje_decoded
+            print(mensaje)
+            return mensaje
+        except serial.serialutil.PortNotOpenError as e:
+            print("El puerto serie no se encuentra abierto.Ejecute TURNONPORT")
+            return "El puerto serie no se encuentra abierto"
+        except Exception:
+            print("Error en el comando ingresado")
+            return "Error en el comando ingresado"
+        
 
     def do_setpinza(self,estado):
         'Habilitacion de pinza/gripper: SETPINZA ON/OFF'
@@ -69,18 +131,22 @@ class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
                 mensaje_decoded=elemento.decode('UTF-8')
                 mensaje+=mensaje_decoded
             return mensaje
-        except AttributeError as e:
-            print("Primero debe encender el puerto serie") #Para que lo muestre en CLI de servidor
-            return "Primero debe encender el puerto serie" #Para que lo muestre en el cliente
+        except serial.serialutil.PortNotOpenError as e:
+            print("El puerto serie no se encuentra abierto.Ejecute TURNONPORT")
+            return "El puerto serie no se encuentra abierto"
+        except Exception:
+            print("Error en el comando ingresado")
+            return "Error en el comando ingresado"
         
-
-    def do_posicion(self,arg):
-        'Establece las nuevas coordenadas absolutas del controlRobot: posicion 1 2 3 10'
-        return self.controlRobot.movLineal(arg)
     
     def do_reset(self,arg):
-        'Resetea al RobotRRR a su posicion inicial: reset'
-        return self.controlRobot.movReset()
+        'Resetea al RobotRRR a su posicion inicial: RESET'
+        try:
+            return self.controlRobot.Reset()
+        except serial.serialutil.PortNotOpenError as e:
+            print("El puerto serie no se encuentra abierto.Ejecute TURNONPORT")
+            return "El puerto serie no se encuentra abierto"
+
 
     def do_exit(self,arg):
         'Salir de la consola: EXIT'

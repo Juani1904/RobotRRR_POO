@@ -13,13 +13,31 @@ class RobotRRR:
     modo="" 
     file=None
     nombreArchivo=""
+    cantidadOperaciones=0 #Con este atributo llevaremos la cuenta de cuantas operaciones se le pide al robot
+    #Tanto desde el CLI del servidor como el del cliente
+
+
+    #Creamos el constructor de RobotRRR.No acepta parametros, solo instancia el objeto del puerto serie
+
+    def __init__(self):
+        try:
+            self.Arduino=serial.Serial("/dev/ttyUSB1",115200,timeout=1) #timeout es el tiempo de respuesta en segundos
+            self.Arduino.close() #Cerramos el puerto serie para que inicie por defecto cerrado
+        except serial.serialutil.SerialException as e:
+            if e.errno==16: #Puerto ocupado
+                print("El puerto serie se encuentra ocupado. Cierre el programa que lo esta usando")
+                return "El puerto serie no se encuentra disponible. Cierre el programa que lo esta usando"
+            elif e.errno==2: #Mal definicion de puerto. Puede estar en el USB0 o USB1
+                self.Arduino=serial.Serial("/dev/ttyUSB0",115200,timeout=1)
+                self.Arduino.close()
+            
+    #Metodos para activar el modo manual (aprendizaje o no) y el modo automatico
 
     def modoManual(self):
         print("¿Quiere ingresar en modo aprendizaje? Ingrese S para Si, N para NO: ")
         submodo=input().upper()
         if (submodo=="S"):
             self.modo="aprendizaje"
-            self.turnONPort()
             print("Ingrese NOMBRE del archivo .txt a crear con los comandos: ", end="")
             self.nombreArchivo=input()+".txt"
             self.file=open(self.nombreArchivo,"w")
@@ -41,7 +59,7 @@ class RobotRRR:
             self.turnONPort()
             #Ahora mandamos al Arduino cada elemento de lista
             for comando in listadelectura:
-                self.Arduino.write(bytes(comando,encoding='UTF-8'))
+                self.Arduino.write(bytes(comando,encoding='UTF-8').strip()) #Con strip me aseguro de eliminar los \t
                 time.sleep(2)
             #Cerramos el puerto serie
             self.turnOFFPort()
@@ -56,49 +74,73 @@ class RobotRRR:
             print("Archivo vacio. Entra a modo manual")
             self.modoManual()
 
+
+    #Metodos de control del puerto serie y robot
+
     #Para abrir el puerto serie para la conexion con Arduino por puerto serie
     def turnONPort(self):
         #Con esta excepcion, si no se puede abrir el puerto serie, se intenta cambiar el num del USB, si no se avisa que no se pudo abrir el puerto 
-        try:
-            self.Arduino=serial.Serial("/dev/ttyUSB0",115200,timeout=1) #timeout es el tiempo de respuesta en segundos
-            time.sleep(2)
-            while(self.Arduino.in_waiting>0): 
-                return self.Arduino.readlines()
-        except FileNotFoundError as e:
-            if e.errno == 2:
-                self.Arduino=serial.Serial("/dev/ttyUSB1",115200,timeout=1)
-                
-            else:
-                print("ERROR: Conecte Arduino nuevamente")
-                raise #Con raise terminamos el codigo ahi
+        self.Arduino.open()
+        time.sleep(2)
+        while(self.Arduino.in_waiting>0): 
+            return self.Arduino.readlines()
+        return "INFO: ROBOT ONLINE"
+        
+            
 
 
     #Para abrir el puerto serie para la conexion con Arduino por puerto serie
     def turnOFFPort(self):
-
         self.Arduino.close()
         time.sleep(2)
         return "INFO: ROBOT OFFLINE"
     
     #Activacion/Desactivacion de motores del robot
     def setMotores(self,estado): #Falso por defecto
-        if estado=="on":
+        
+        if (estado=="on"):
             self.Arduino.write(b"M17\r\n")
             #Para escribir el comando en el modo manual
             if self.modo=="aprendizaje" and self.file!=None:
                 self.file.write("M17\r\n")
             time.sleep(2)
             return "INFO: STEPPERS ENABLED"
-        elif estado=="off":
+        elif (estado=="off"):
             self.Arduino.write(b"M18\r\n")
             #Para escribir el comando en el modo manual
             if self.modo=="aprendizaje" and self.file!=None:
                 self.file.write("M18\r\n")
             time.sleep(2)
             return "INFO: STEPPERS DISABLED"
+
+    #Movimiento lineal del robot
+    def setPosicionLineal(self,coordX,coordY,coordZ,velocidad):
         
+        self.Arduino.write(bytes("G1X"+coordX+"Y"+coordY+"Z"+coordZ+"E"+velocidad+"\r\n",encoding='utf-8'))
+        if self.modo=="aprendizaje" and self.file!=None:
+            self.file.write("G1\tX"+coordX+"\tY"+coordY+"\tZ"+coordZ+"\tE"+velocidad+"\r\n")
+        time.sleep(2)
+        while(self.Arduino.in_waiting>0): 
+            return self.Arduino.readlines()
+        
+    #Movimiento angular del robot
+    def setAngularMotor1(self,velocidad:float,sentido:str,angulo:float):
+        
+        #Este metodo simplemente entrega un mensaje
+        return f"INFO: Valores seteados. Velocidad: {velocidad} mm/s, Sentido: {sentido}, Angulo: {angulo} grados"
+    
+    def setAngularMotor2(self,velocidad:float,sentido:str,angulo:float):
+        
+        #Este metodo simplemente entrega un mensaje
+        return f"INFO: Valores seteados. Velocidad: {velocidad} mm/s, Sentido: {sentido}, Angulo: {angulo} grados"
+    
+    def setAngularMotor3(self,velocidad:float,sentido:str,angulo:float):
+        
+        #Este metodo simplemente entrega un mensaje
+        return f"INFO: Valores seteados. Velocidad: {velocidad} mm/s, Sentido: {sentido}, Angulo: {angulo} grados"
+
     #Para abrir o cerrar la pinza (gripper) [Actividad del efector final]
-    def setPinza(self,estado="off"): #Falso por defecto
+    def setPinza(self,estado): #Falso por defecto
         if (estado=="on"):
             self.Arduino.write(b"M3\r\n")
             #Para escribir el comando en el modo manual
@@ -110,15 +152,24 @@ class RobotRRR:
             if self.modo=="aprendizaje" and self.file!=None:
                 self.file.write("M5\r\n")
         time.sleep(2)
-
-        if(self.Arduino.in_waiting>0): 
+        while(self.Arduino.in_waiting>0): 
             return self.Arduino.readlines()
+        
 
-    def movReset(self):
-        #Primero establecemos modo de coordenadas absolutas por las dudas
-        self.Arduino.write(b"G90")
-        #Ahora lo llevamos a la posicion de origen
-        self.Arduino.write(b"g1x0y0z0e10") #Por defecto le asignamos una velocidad de 10mm/s
+
+    
+        
+
+
+    def Reset(self): #Tambien llamado Homing. Sirve para que el brazo vuelva a su posicion de origen/descanso
+
+        self.Arduino.write(b"G28\r\n")
+        if self.modo=="aprendizaje" and self.file!=None:
+            self.file.write("G28\r\n")
+        time.sleep(2)
+        while(self.Arduino.in_waiting>0): 
+            return self.Arduino.readlines()
+        
         
 
         
