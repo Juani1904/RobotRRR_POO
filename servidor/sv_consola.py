@@ -50,22 +50,28 @@ class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
     
     def do_setmotores(self,estado):
         "Activacion/Desactivacion de los motores del robot: SETMOTORES ON/OFF"
-        mensaje=self.controlRobot.setMotores(estado)
+        try:
+            mensaje=self.controlRobot.setMotores(estado)
         
-        return mensaje
+            return mensaje
+        except AttributeError as e:
+            print("Primero debe encender el puerto serie") #Para que lo muestre en CLI de servidor
+            return "Primero debe encender el puerto serie" #Para que lo muestre en el cliente
 
-    
-    
     
 
     def do_setpinza(self,estado):
-        'Habilitacion de pinza/gripper: estadopinza on/off'
-        mensaje=""
-        listamensaje=self.controlRobot.setPinza(estado)
-        for elemento in listamensaje:
-            mensaje_decoded=elemento.decode('UTF-8')
-            mensaje+=mensaje_decoded
-        return mensaje
+        'Habilitacion de pinza/gripper: SETPINZA ON/OFF'
+        try:
+            mensaje=""
+            listamensaje=self.controlRobot.setPinza(estado)
+            for elemento in listamensaje:
+                mensaje_decoded=elemento.decode('UTF-8')
+                mensaje+=mensaje_decoded
+            return mensaje
+        except AttributeError as e:
+            print("Primero debe encender el puerto serie") #Para que lo muestre en CLI de servidor
+            return "Primero debe encender el puerto serie" #Para que lo muestre en el cliente
         
 
     def do_posicion(self,arg):
@@ -78,39 +84,9 @@ class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
 
     def do_exit(self,arg):
         'Salir de la consola: EXIT'
-        self.cerrarArchivo() #Cerramos archivo de modo manual
         print("Saliendo de la consola...")
         time.sleep(1)
         sys.exit()
-
-
-
-    #Metodos para la construccion y apertura de archivos de comandos
-    def modoManual(self, archivo):
-        self.file = open(archivo, 'w')
-
-    def modoAutomatico(self, archivo):
-        #El modo automatico solo sera valido cuando el archivo de comandos exista, y cuando no este vacio
-        #Si no se entrara directamente a modo manual
-        try:
-            with open(archivo) as f:
-                self.cmdqueue.extend(f.read().splitlines())
-        except FileNotFoundError as e:
-            if e.errno==2:
-                print("Archivo no encontrado.Entra a modo manual")
-                print("Ingrese NOMBRE del archivo .txt que contiene los comandos: ", end="")
-                archivonuevo=input()+".txt"
-                self.modoManual(archivonuevo)
-        except os.stat(archivo).st_size==0:
-            print("Archivo vacio. Entra a modo manual")
-            print("Ingrese NOMBRE del archivo .txt que contiene los comandos: ", end="")
-            archivonuevo=input()+".txt"
-            self.modoManual(archivonuevo)
-    
-    def cerrarArchivo(self):
-        if self.file: #Si el archivo existe, entrega un valor booleano True, si no tira False
-            self.file.close()
-            self.file = None
 
 
 
@@ -135,28 +111,24 @@ class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
     def preloop(self):
         #Creamos una pequeña animacion para el servidor antes de que se inicie
 
-         #HABILITAR AL TERMINAR CODIGO
+        """#HABILITAR AL TERMINAR CODIGO
         print("Iniciando...")
         time.sleep(1)
         for i in range(0,101):
             time.sleep(0.05)
             print("Cargando consola IU Server...[%d%%]" % i, end="\r")
         print("Cargando consola IU Server...[100%]")
-        time.sleep(0.5)
+        time.sleep(0.5)"""
         
         print("\n\n**********Bienvenido a Veneris Server ®**********\n")
         time.sleep(0.5)
         print("Ingrese el modo de trabajo: Manual o Automatico(M/A): ", end="")
-        modo=input()
+        modo=input().upper()
         if modo=="M":
-            print("Ingrese NOMBRE del archivo .txt a crear con los comandos: ", end="")
-            archivo=input()+".txt"
-            self.modoManual(archivo)
+            self.controlRobot.modoManual()
             pass
         elif modo=="A":
-            print("Ingrese NOMBRE del archivo .txt que contiene los comandos: ", end="")
-            archivo=input()+".txt"
-            self.modoAutomatico(archivo)
+            self.controlRobot.modoAutomatico()
             pass
         print("Lista de comandos disponibles:")
         time.sleep(0.5)
