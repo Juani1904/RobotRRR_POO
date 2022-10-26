@@ -30,8 +30,6 @@ class RobotRRR:
                 print("ERROR: Conecte Arduino nuevamente")
                 raise #Con raise terminamos el codigo ahi
 
-        
-        
 
     #Para abrir el puerto serie para la conexion con Arduino por puerto serie
     def turnOFFPort(self):
@@ -39,8 +37,21 @@ class RobotRRR:
         self.Arduino.close()
         time.sleep(2)
         return "INFO: ROBOT OFFLINE"
+    
+    #Activacion/Desactivacion de motores del robot
+    def setMotores(self,estado): #Falso por defecto
+        if estado=="on":
+            self.Arduino.write(b"M17")
+            time.sleep(2)
+            return "INFO: STEPPERS ENABLED"
+        elif estado=="off":
+            self.Arduino.write(b"M18")
+            time.sleep(2)
+            return "INFO: STEPPERS DISABLED"
+        
 
-    #Para abrir o cerrar la pinza (gripper)
+
+    #Para abrir o cerrar la pinza (gripper) [Actividad del efector final]
     def setPinza(self,estado=False): #Falso por defecto
         
         if (estado==True):
@@ -52,12 +63,7 @@ class RobotRRR:
         if(self.Arduino.in_waiting>0): 
             return self.Arduino.readlines()
     
-    def movLineal(self,coordX,coordY,coordZ,velocidad):
-        
-        self.Arduino.write(bytes("g1x"+str(coordX)+"y"+str(coordY)+"z"+str(coordZ)+"e"+str(velocidad),encoding='utf-8'))
-        time.sleep(2)
-        while(self.Arduino.in_waiting()>0): 
-            return self.Arduino.readline()
+    
     
     def movReset(self):
         #Primero establecemos modo de coordenadas absolutas por las dudas

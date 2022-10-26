@@ -40,43 +40,25 @@ class Servidor(object):
                 else:
                     print("El servidor RPC no puede ser iniciado")
                     raise
-        """# Se registra cada funcion que realiza el servicio (robot)
-        # Los nombres que pongamos entre "" son con los que voy a tener que llamar a la funcion en mi
-        codigo cliente. Pueden diferir estos a como estan referenciados en "sv_robot.py"
-        # Luego los nombres do_saludar y do_calcular vienen de los metodos que vamos a definir mas
-        abajo, junto con run_server y shutdown
-        """ 
+        
+        #Aca, dentro del mismo constructor, registramos las funciones a ser llamadas por el cliente
        
         self.server.register_function(self.do_turnONPort,"habilitarpuerto")
         self.server.register_function(self.do_turnOFFPort,"deshabilitarpuerto")
-        # Se lanza el servidor en un hilo de control mediante Thread
+        self.server.register_function(self.do_setMotores,"setmotores")
 
-        """*target* is the callable object to be invoked by the run()
-        method. Defaults to None, meaning nothing is called. En este caso el run method
-        sera run_server y lo creamos a continuacion de esto"""
-        #if (self.consola.do_svstatus()):
-        #self.thread = Thread(target=self.run_server) #Instanciamos el objeto thead
+     
 
-        #self.thread.start() #Utilizamos atributo start() del objeto thread
+    #Ahora definimos metodos que tendra mi clase Servidor
 
-        #print("Servidor RPC iniciado en el puerto [%s]" % str(self.server.server_address))
-
-        
-
-    #Ahora definimos algunos otros metodos que tendra mi clase Servidor
-
-    #Metodo para iniciar el servidor
     def run_server(self):
         
         self.server.serve_forever()
 
-    #Metodo para cerrar el servidor
     def shutdown(self):
-        
         self.server.shutdown()
         self.thread.join()
 
-    #Metodo para calcular.
   
     #Metodo para habilitar el puerto serie
    
@@ -87,4 +69,8 @@ class Servidor(object):
     def do_turnOFFPort(self):
         
         return self.consola.do_turnoffport()
+
+    def do_setMotores(self,estado):
+
+        return self.consola.do_setmotores(estado)
 

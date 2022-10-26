@@ -29,7 +29,8 @@ int main(){
         cout<<"\n";
         cout<<"1.Habilitar puerto serie"<<endl;
         cout<<"2.Deshabilitar puerto serie"<<endl;
-        cout<<"3.Exit"<<endl;
+        cout<<"3.Activar/Desactivar motores robot"<<endl;
+        cout<<"4.Exit"<<endl;
         cout<<"\n";
         cout<<"Seleccion: ";
         cin>>opcion;
@@ -37,20 +38,29 @@ int main(){
         switch(opcion)
         {
             case 1: {
-                XmlRpcValue noArg,result1;
-                Cliente.execute("habilitarpuerto",noArg,result1);
-                cout<<result1<<"\n\n";
+                XmlRpcValue noArg,result;
+                Cliente.execute("habilitarpuerto",noArg,result);
+                cout<<result<<"\n\n";
                     }
             break;
             case 2: {
-                XmlRpcValue noArg,result1;
-                Cliente.execute("deshabilitarpuerto",noArg,result1);
-                cout<<result1<<"\n\n";
+                XmlRpcValue noArg,result;
+                Cliente.execute("deshabilitarpuerto",noArg,result);
+                cout<<result<<"\n\n";
                     }
-                ;
             break;
-            case 3: exit(1); break;
-            default: break;
+            case 3: {
+                string respuesta;
+                XmlRpcValue OneArg,result;
+                cout<<"Ingrese 'on' para activar los motores o 'off' para desactivarlos: ";
+                cin>>respuesta;
+                OneArg[0]=respuesta;
+                Cliente.execute("setmotores",OneArg,result);
+                cout<<result<<"\n\n";
+                    }
+            break;
+            default: flag=false; break;
+            
         }
         
         
