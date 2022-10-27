@@ -33,16 +33,26 @@ class RobotRRR:
             
     #Metodos para activar el modo manual (aprendizaje o no) y el modo automatico
 
-    def modoManual(self):
-        print("¿Quiere ingresar en modo aprendizaje? Ingrese S para Si, N para NO: ")
-        submodo=input().upper()
-        if (submodo=="S"):
-            self.modo="aprendizaje"
-            print("Ingrese NOMBRE del archivo .txt a crear con los comandos: ", end="")
-            self.nombreArchivo=input()+".txt"
+    def modoManual(self,nombreexterno=None):
+        #Si el nombre externo es distinto de None, significa que se esta llamando desde el Cliente
+        #Si el nombre externo es None, significa que se esta llamando desde el servidor
+        
+        #Caso cliente. Si o si entraria en modo aprendizaje, porque si no llamaria a las funciones por otro lado.
+        if nombreexterno!=None:
+            self.nombreArchivo=nombreexterno
             self.file=open(self.nombreArchivo,"w")
-        elif (submodo=="N"):
-            self.modo="manual"
+            self.modo="aprendizaje"
+        #Caso servidor
+        elif nombreexterno==None:
+            print("¿Quiere ingresar en modo aprendizaje? Ingrese S para Si, N para NO: ")
+            submodo=input().upper()
+            if (submodo=="S"):
+                self.modo="aprendizaje"
+                print("Ingrese NOMBRE del archivo .txt a crear con los comandos: ", end="")
+                self.nombreArchivo=input()+".txt"
+                self.file=open(self.nombreArchivo,"w")
+            elif (submodo=="N"):
+                self.modo="manual"
         return "INFO: MODO MANUAL ACTIVADO"
 
     def modoAutomatico(self):
@@ -113,6 +123,9 @@ class RobotRRR:
             time.sleep(2)
             return "INFO: STEPPERS DISABLED"
 
+        else: 
+            return Exception
+
     #Movimiento lineal del robot
     def setPosicionLineal(self,coordX,coordY,coordZ,velocidad):
         
@@ -155,11 +168,6 @@ class RobotRRR:
         while(self.Arduino.in_waiting>0): 
             return self.Arduino.readlines()
         
-
-
-    
-        
-
 
     def Reset(self): #Tambien llamado Homing. Sirve para que el brazo vuelva a su posicion de origen/descanso
 

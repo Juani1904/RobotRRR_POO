@@ -43,12 +43,16 @@ class Servidor(object):
         
         #Aca, dentro del mismo constructor, registramos las funciones a ser llamadas por el cliente
        
-        self.server.register_function(self.do_turnONPort,"habilitarpuerto")
-        self.server.register_function(self.do_turnOFFPort,"deshabilitarpuerto")
+        self.server.register_function(self.do_turnONPort,"turnonport")
+        self.server.register_function(self.do_turnOFFPort,"turnoffport")
         self.server.register_function(self.do_setMotores,"setmotores")
+        self.server.register_function(self.do_setPosicionLineal,"setposicionlineal")
+        self.server.register_function(self.do_setAngularMotor1,"setangularmotor1")
+        self.server.register_function(self.do_setAngularMotor2,"setangularmotor2")
+        self.server.register_function(self.do_setAngularMotor3,"setangularmotor3")
         self.server.register_function(self.do_setPinza,"setpinza")
+        self.server.register_function(self.do_Reset,"reset")
 
-     
 
     #Ahora definimos metodos que tendra mi clase Servidor
 
@@ -61,7 +65,13 @@ class Servidor(object):
         self.thread.join()
 
   
-    #Metodo para habilitar el puerto serie
+    def modoManual(self):
+
+        return self.consola.modoManual()
+
+    def modoAutomatico(self):
+
+        return self.consola.modoAutomatico()
    
     def do_turnONPort(self):
          
@@ -75,7 +85,32 @@ class Servidor(object):
 
         return self.consola.do_setmotores(estado)
     
+
+    def do_setPosicionLineal(self,parametros):
+
+        return self.consola.do_setposicionlineal(parametros)
+
+    
+    def do_setAngularMotor1(self,parametros):
+
+        return self.consola.do_setangularmotor1(parametros)
+
+    def do_setAngularMotor2(self,parametros):
+
+        return self.consola.do_setangularmotor2(parametros)
+    
+    def do_setAngularMotor3(self,parametros):
+
+        return self.consola.do_setangularmotor3(parametros)
+    
     def do_setPinza(self,estado):
 
         return self.consola.do_setpinza(estado)
 
+    def do_Reset(self):
+
+        return self.consola.do_reset()
+    
+
+    
+    

@@ -60,7 +60,7 @@ class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
         try:
             mensaje=self.controlRobot.setMotores(estado)
             return mensaje
-        except serial.serialutil.PortNotOpenError as e:
+        except serial.serialutil.PortNotOpenError:
             print("El puerto serie no se encuentra abierto.Ejecute TURNONPORT")
             return "El puerto serie no se encuentra abierto"
         except Exception:
@@ -112,7 +112,6 @@ class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
             for elemento in listamensaje:
                 mensaje_decoded=elemento.decode('UTF-8')
                 mensaje+=mensaje_decoded
-            print(mensaje)
             return mensaje
         except serial.serialutil.PortNotOpenError as e:
             print("El puerto serie no se encuentra abierto.Ejecute TURNONPORT")
@@ -131,7 +130,7 @@ class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
                 mensaje_decoded=elemento.decode('UTF-8')
                 mensaje+=mensaje_decoded
             return mensaje
-        except serial.serialutil.PortNotOpenError as e:
+        except serial.serialutil.PortNotOpenError:
             print("El puerto serie no se encuentra abierto.Ejecute TURNONPORT")
             return "El puerto serie no se encuentra abierto"
         except Exception:
