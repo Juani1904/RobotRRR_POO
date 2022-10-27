@@ -6,6 +6,8 @@ import sys
 from types import NoneType
 import serial
 class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
+    cdadOrdenes=0 #Con este atributo llevaremos la cuenta de cuantas operaciones se le pide al robot
+    #Tanto desde el CLI del servidor como el del cliente
     #Los "atributos" que vamos a setear aca son realmente metodos de la clase Cmd (ejemplo Cmd.intro(string))
     intro=""
     prompt="V>>"
@@ -24,6 +26,7 @@ class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
     
     def do_svstatus_switch(self,estado):
         'Abrir o Cerrar el servidor: svstatus_switch on/off'
+        self.cdadOrdenes+=1
         if estado =="on":
             # Se lanza el servidor en un hilo de control mediante Thread
             #Instanciamos el objeto thread
@@ -33,10 +36,22 @@ class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
         elif estado =="off":
             self.servidor.shutdown()
             print("Servidor RPC en el puerto [%s] fue cerrado" % str(self.servidor.server.server_address))
+
+    def do_modomanual(self,nombreexterno=None):
+        'Pasar a modo manual: MODOMANUAL'
+        self.cdadOrdenes+=1
+        self.controlRobot.modoManual(nombreexterno)
+
+
+    def do_modoautomatico(self,nombreexterno=None):
+        'Pasar a modo automatico: MODOAUTOMATICO'
+        self.cdadOrdenes+=1
+        self.controlRobot.modoAutomatico(nombreexterno)
     
     
     def do_turnonport(self,arg=None):
         'Activar el puerto serie: TURNONPORT'
+        self.cdadOrdenes+=1
         try:
             mensaje=""
             listamensaje=self.controlRobot.turnONPort()
@@ -52,11 +67,13 @@ class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
 
     def do_turnoffport(self,arg=None):
         'Deshabilita puerto serie: TURNOFFPORT'
+        self.cdadOrdenes+=1
         mensaje=self.controlRobot.turnOFFPort()
         return mensaje
     
     def do_setmotores(self,estado):
         "Activacion/Desactivacion de los motores del robot: SETMOTORES ON/OFF"
+        self.cdadOrdenes+=1
         try:
             mensaje=self.controlRobot.setMotores(estado)
             return mensaje
@@ -68,7 +85,8 @@ class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
             return "Error en el comando ingresado"
     
     def do_setangularmotor1(self,parametros):
-        'Setear velocidad, sentido y angulo del motor1: SETANGULARMOTOR1 VEL(num) HOR/ANTH(str) ANG(num)' 
+        'Setear velocidad, sentido y angulo del motor1: SETANGULARMOTOR1 VEL(num) HOR/ANTH(str) ANG(num)'
+        self.cdadOrdenes+=1
         try:
             velocidad,sentido,angulo=parametros.split()
             return self.controlRobot.setAngularMotor1(velocidad,sentido,angulo)
@@ -81,6 +99,7 @@ class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
     
     def do_setangularmotor2(self,parametros):
         'Setear velocidad, sentido y angulo del motor2: SETANGULARMOTOR2 VEL(num) HOR/ANTH(str) ANG(num)'
+        self.cdadOrdenes+=1
         try:
             velocidad,sentido,angulo=parametros.split()
             return self.controlRobot.setAngularMotor2(velocidad,sentido,angulo)
@@ -93,6 +112,7 @@ class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
     
     def do_setangularmotor3(self,parametros):
         'Setear velocidad, sentido y angulo del motor3: SETANGULARMOTOR3 VEL(num) HOR/ANTH(str) ANG(num)'
+        self.cdadOrdenes+=1
         try:
             velocidad,sentido,angulo=parametros.split()
             return self.controlRobot.setAngularMotor3(velocidad,sentido,angulo)
@@ -105,6 +125,7 @@ class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
 
     def do_setposicionlineal(self,parametros):
         'Setear posicion y velocidad del robot: SETPOSICIONLINEAL X Y Z VEL'
+        self.cdadOrdenes+=1
         try:
             coordX,coordY,coordZ,velocidad=parametros.split()
             mensaje=""
@@ -123,6 +144,7 @@ class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
 
     def do_setpinza(self,estado):
         'Habilitacion de pinza/gripper: SETPINZA ON/OFF'
+        self.cdadOrdenes+=1
         try:
             mensaje=""
             listamensaje=self.controlRobot.setPinza(estado)
@@ -140,6 +162,7 @@ class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
     
     def do_reset(self,arg):
         'Resetea al RobotRRR a su posicion inicial: RESET'
+        self.cdadOrdenes+=1
         try:
             return self.controlRobot.Reset()
         except serial.serialutil.PortNotOpenError as e:
@@ -149,9 +172,15 @@ class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
 
     def do_exit(self,arg):
         'Salir de la consola: EXIT'
+        self.cdadOrdenes+=1
         print("Saliendo de la consola...")
         time.sleep(1)
         sys.exit()
+    
+    #Getter que llamare luego desde el servidor a peticion del cliente
+
+    def getOrdenes(self):
+        return self.cdadOrdenes
 
 
 
@@ -187,14 +216,8 @@ class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
         
         print("\n\n**********Bienvenido a Veneris Server ®**********\n")
         time.sleep(0.5)
-        print("Ingrese el modo de trabajo: Manual o Automatico(M/A): ", end="")
-        modo=input().upper()
-        if modo=="M":
-            self.controlRobot.modoManual()
-            pass
-        elif modo=="A":
-            self.controlRobot.modoAutomatico()
-            pass
+        self.do_svstatus_switch("on") #Para iniciar el servidor por defecto
+        time.sleep(0.5)
         print("Lista de comandos disponibles:")
         time.sleep(0.5)
         self.do_help(None)

@@ -13,9 +13,6 @@ class RobotRRR:
     modo="" 
     file=None
     nombreArchivo=""
-    cantidadOperaciones=0 #Con este atributo llevaremos la cuenta de cuantas operaciones se le pide al robot
-    #Tanto desde el CLI del servidor como el del cliente
-
 
     #Creamos el constructor de RobotRRR.No acepta parametros, solo instancia el objeto del puerto serie
 
@@ -36,37 +33,36 @@ class RobotRRR:
     def modoManual(self,nombreexterno=None):
         #Si el nombre externo es distinto de None, significa que se esta llamando desde el Cliente
         #Si el nombre externo es None, significa que se esta llamando desde el servidor
-        
+
         #Caso cliente. Si o si entraria en modo aprendizaje, porque si no llamaria a las funciones por otro lado.
         if nombreexterno!=None:
-            self.nombreArchivo=nombreexterno
-            self.file=open(self.nombreArchivo,"w")
-            self.modo="aprendizaje"
+            self.nombreArchivo=nombreexterno+".txt"
         #Caso servidor
         elif nombreexterno==None:
-            print("¿Quiere ingresar en modo aprendizaje? Ingrese S para Si, N para NO: ")
-            submodo=input().upper()
-            if (submodo=="S"):
-                self.modo="aprendizaje"
-                print("Ingrese NOMBRE del archivo .txt a crear con los comandos: ", end="")
-                self.nombreArchivo=input()+".txt"
-                self.file=open(self.nombreArchivo,"w")
-            elif (submodo=="N"):
-                self.modo="manual"
-        return "INFO: MODO MANUAL ACTIVADO"
+            print("Ingrese NOMBRE del archivo .txt a crear con los comandos: ", end="")
+            self.nombreArchivo=input()+".txt"
+        #Luego
+        self.modo="aprendizaje"
+        self.file=open(self.nombreArchivo,"w")
+        return "INFO: MODO MANUAL(APRENDIZAJE) ACTIVADO"
 
-    def modoAutomatico(self):
+    def modoAutomatico(self,nombreexterno=None):
         #El modo automatico solo sera valido cuando el archivo de comandos exista, y cuando no este vacio
         #Si no se entrara directamente a modo manual
-        print("Ingrese NOMBRE del archivo .txt que contiene los comandos: ", end="")
-        self.nombreArchivo=input()+".txt"
+        if nombreexterno!=None:
+            self.nombreArchivo=nombreexterno+".txt"
+        elif nombreexterno==None:
+            print("Ingrese NOMBRE del archivo .txt que contiene los comandos: ", end="")
+            self.nombreArchivo=input()+".txt"
         try:
+            self.modo="automatico"
             #Leemos el archivo y colocamos cada linea como elemento de una lista "listadelectura"
             archivolectura=open(self.nombreArchivo,"r")
             listadelectura=archivolectura.readlines()
             archivolectura.close() #Cerramos el archivo.Importante, si no el programa tira error
-            #Primero abrimos el puerto del Arduino
-            self.turnONPort()
+            #Primero abrimos el puerto del Arduino, si no se encontrara abierto
+            if self.Arduino.isOpen()==False:
+                self.turnONPort()
             #Ahora mandamos al Arduino cada elemento de lista
             for comando in listadelectura:
                 self.Arduino.write(bytes(comando,encoding='UTF-8').strip()) #Con strip me aseguro de eliminar los \t

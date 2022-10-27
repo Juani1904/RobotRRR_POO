@@ -42,7 +42,8 @@ class Servidor(object):
                     raise
         
         #Aca, dentro del mismo constructor, registramos las funciones a ser llamadas por el cliente
-       
+        self.server.register_function(self.do_modoManual, "do_modoManual")
+        self.server.register_function(self.do_modoAutomatico, "do_modoAutomatico")
         self.server.register_function(self.do_turnONPort,"turnonport")
         self.server.register_function(self.do_turnOFFPort,"turnoffport")
         self.server.register_function(self.do_setMotores,"setmotores")
@@ -52,9 +53,10 @@ class Servidor(object):
         self.server.register_function(self.do_setAngularMotor3,"setangularmotor3")
         self.server.register_function(self.do_setPinza,"setpinza")
         self.server.register_function(self.do_Reset,"reset")
+        self.server.register_function(self.getOrdenes,"getOrdenes")
 
 
-    #Ahora definimos metodos que tendra mi clase Servidor
+    #Funciones para el iniciar y cerrar el servidor
 
     def run_server(self):
         
@@ -64,40 +66,54 @@ class Servidor(object):
         self.server.shutdown()
         self.thread.join()
 
+    #Funcion para iniciar el modo manual o de aprendizaje
   
-    def modoManual(self):
+    def do_modoManual(self,textoexterno):
 
-        return self.consola.modoManual()
+        return self.consola.do_modomanual(textoexterno)
 
-    def modoAutomatico(self):
+    #Funcion para iniciar el modo automatico
 
-        return self.consola.modoAutomatico()
-   
+    def do_modoAutomatico(self,textoexterno):
+
+        return self.consola.do_modoautomatico(textoexterno)
+    
+    #Funcion para abrir el puerto serie
     def do_turnONPort(self):
          
         return self.consola.do_turnonport()
     
+    #Funcion para cerrar el puerto serie
+    
     def do_turnOFFPort(self):
         
         return self.consola.do_turnoffport()
+    
+    #Funcion para habilitar o deshabilitar los motores del robot
 
     def do_setMotores(self,estado):
 
         return self.consola.do_setmotores(estado)
     
-
+    #Funcion para mover el brazo a un punto determinado linealmente
+    
     def do_setPosicionLineal(self,parametros):
 
         return self.consola.do_setposicionlineal(parametros)
-
     
+    #Funcion para controlar de manera angular el Motor1 del robot
+
     def do_setAngularMotor1(self,parametros):
 
         return self.consola.do_setangularmotor1(parametros)
+    
+    #Funcion para controlar de manera angular el Motor2 del robot
 
     def do_setAngularMotor2(self,parametros):
 
         return self.consola.do_setangularmotor2(parametros)
+    
+    #Funcion para controlar de manera angular el Motor3 del robot
     
     def do_setAngularMotor3(self,parametros):
 
@@ -110,6 +126,11 @@ class Servidor(object):
     def do_Reset(self):
 
         return self.consola.do_reset()
+    
+    #Definimos el getter por el cual vamos a obtener la cantidad de ordenes solicitadas, tanto por el
+    #cliente como por el servidor
+    def getOrdenes(self):
+        return self.consola.getOrdenes()
     
 
     
