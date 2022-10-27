@@ -174,42 +174,6 @@ class RobotRRR:
         while(self.Arduino.in_waiting>0): 
             return self.Arduino.readlines()
         
-        
-
-        
-
-        
-
-    
-
-
-    
-
-
-
-
-
-
-
-
-
-
-"""
-flag=True
-while(flag):
-    time.sleep(2)
-    while(Arduino.inWaiting()>0):
-        print(Arduino.readline())
-
-
-
-
-    mensaje=input("Ingrese comando a enviar a puerto serie: ")
-    Arduino.write(bytes(mensaje+"\r\n",encoding='utf-8'))
-    
-    if(mensaje=="exit"):
-        flag=False
-"""
 
 
 

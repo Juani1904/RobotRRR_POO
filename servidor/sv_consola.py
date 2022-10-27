@@ -205,14 +205,14 @@ class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
     def preloop(self):
         #Creamos una pequeña animacion para el servidor antes de que se inicie
 
-        """#HABILITAR AL TERMINAR CODIGO
+        #HABILITAR AL TERMINAR CODIGO
         print("Iniciando...")
         time.sleep(1)
         for i in range(0,101):
             time.sleep(0.05)
             print("Cargando consola IU Server...[%d%%]" % i, end="\r")
         print("Cargando consola IU Server...[100%]")
-        time.sleep(0.5)"""
+        time.sleep(0.5)
         
         print("\n\n**********Bienvenido a Veneris Server ®**********\n")
         time.sleep(0.5)
