@@ -123,6 +123,21 @@ int main(){
         cout<<"\n";
         cout<<"Seleccione el numero de opcion.Seleccione opcion (13) para la lista de comandos: ";
         cin>>opcion;
+        //Para que el programa no empiece a loopear si el usuario mete un string, usamos la funcion
+        //cin.fail() que devuelve true si el usuario mete un string
+        bool flag=true;
+        while(flag){
+            if(cin.fail()){
+                cout<<"\nOpcion no valida.Seleccione el comando nuevamente\n"<<endl;
+                cout<<"Seleccione el numero de opcion.Seleccione opcion (13) para la lista de comandos: ";
+                cin.clear();
+                cin.ignore(256,'\n');
+                cin>>opcion;
+            }
+            else{
+                flag=false;
+            }
+        }
         cout<<"\n";
         switch(opcion)
         {   
