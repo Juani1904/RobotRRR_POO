@@ -290,7 +290,7 @@ int main(){
                 cout<<"Saliendo..."<<endl;
                 //Cerramos el archivo creado en el modo manual
                 XmlRpcValue noArg,result;
-                Cliente.execute("cerrararchivo",noArg,result);
+                Cliente.execute("cerrararchivoexterno",noArg,result);
                 flag=false;
                 }
             break;

@@ -53,7 +53,7 @@ class Servidor(object):
         self.server.register_function(self.do_setPinza,"setpinza")
         self.server.register_function(self.do_Reset,"reset")
         self.server.register_function(self.getnumOrdenes,"getnumordenes")
-        self.server.register_function(self.cerrarArchivo,"cerrararchivo")
+        self.server.register_function(self.cerrarArchivoExterno,"cerrararchivoexterno")
         self.server.register_function(self.getComandos,"getcomandos")
 
     #Funciones para el iniciar y cerrar el servidor
@@ -135,8 +135,8 @@ class Servidor(object):
         return self.consola.getnumOrdenes()
     
     #Metodo para cerrar el archivo de modo manual, para que el cliente lo pueda cerrar remotamente
-    def cerrarArchivo(self):
-        self.consola.controlRobot.cerrarArchivo()
+    def cerrarArchivoExterno(self):
+        self.consola.controlRobot.cerrarArchivoExterno()
         return 0
     
     def getComandos(self):

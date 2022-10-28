@@ -1,7 +1,6 @@
 from cmd import Cmd
 from threading import Thread
 import time
-import sys
 import serial
 class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
     exit=True
@@ -175,13 +174,14 @@ class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
             return mensaje
         except serial.serialutil.PortNotOpenError as e:
             print("El puerto serie no se encuentra abierto.Ejecute TURNONPORT")
-            return "El puerto serie no se encuentra abierto"
+            return "El puerto serie no se encuentra abierto."
 
 
     def do_exit(self,*arg):
         'Salir de la consola: EXIT'
         #Primero, si el archivo de modo manual sigue abierto lo cerramos
-        self.controlRobot.cerrarArchivo()
+        if (self.controlRobot.fileInterno!=None):
+            self.cerrarArchivoInterno()
         #Cerramos el servidor
         self.do_svstatus_switch("off")
         print("Saliendo de la consola...")
@@ -193,10 +193,13 @@ class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
     def getnumOrdenes(self):
         return self.cdadOrdenes
     
-    #Metodo para cerrar el archivo. Esto para que el cliente tambien pueda acceder y cerrar el archivo
+    #Metodos para cerrar los archivos
 
-    def cerrarArchivo(self):
-        self.controlRobot.cerrarArchivo()
+    def cerrarArchivoExterno(self):
+        self.controlRobot.cerrarArchivoExterno()
+
+    def cerrarArchivoInterno(self):
+        self.controlRobot.cerrarArchivoInterno()
 
 
     #Metodos para el manejo de la consola
