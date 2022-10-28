@@ -163,11 +163,16 @@ class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
             return "Error en el comando ingresado"
         
     
-    def do_reset(self,arg):
+    def do_reset(self,arg=None):
         'Resetea al RobotRRR a su posicion inicial: RESET'
         self.cdadOrdenes+=1
         try:
-            return self.controlRobot.Reset()
+            mensaje=""
+            listamensaje=self.controlRobot.Reset()
+            for elemento in listamensaje:
+                mensaje_decoded=elemento.decode('UTF-8')
+                mensaje+=mensaje_decoded
+            return mensaje
         except serial.serialutil.PortNotOpenError as e:
             print("El puerto serie no se encuentra abierto.Ejecute TURNONPORT")
             return "El puerto serie no se encuentra abierto"
