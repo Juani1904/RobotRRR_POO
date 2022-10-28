@@ -1,11 +1,10 @@
 from cmd import Cmd
-import os
 from threading import Thread
 import time
 import sys
-from types import NoneType
 import serial
 class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
+    exit=True
     cdadOrdenes=0 #Con este atributo llevaremos la cuenta de cuantas operaciones se le pide al robot
     #Tanto desde el CLI del servidor como el del cliente
     #Los "atributos" que vamos a setear aca son realmente metodos de la clase Cmd (ejemplo Cmd.intro(string))
@@ -25,7 +24,7 @@ class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
     
     
     def do_svstatus_switch(self,estado):
-        'Abrir o Cerrar el servidor: svstatus_switch on/off'
+        'Abrir o Cerrar el servidor: SVSTATUS_SWITCH ON/OFF'
         self.cdadOrdenes+=1
         if estado =="on":
             # Se lanza el servidor en un hilo de control mediante Thread
@@ -37,16 +36,16 @@ class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
             self.servidor.shutdown()
             print("Servidor RPC en el puerto [%s] fue cerrado" % str(self.servidor.server.server_address))
 
-    def do_modomanual(self,nombreexterno=None):
+    def do_modomanual(self,nombreexterno=""):
         'Pasar a modo manual: MODOMANUAL'
         self.cdadOrdenes+=1
-        self.controlRobot.modoManual(nombreexterno)
+        return self.controlRobot.modoManual(nombreexterno)
 
 
     def do_modoautomatico(self,nombreexterno=None):
         'Pasar a modo automatico: MODOAUTOMATICO'
         self.cdadOrdenes+=1
-        self.controlRobot.modoAutomatico(nombreexterno)
+        return self.controlRobot.modoAutomatico(nombreexterno)
     
     
     def do_turnonport(self,arg=None):
@@ -84,6 +83,7 @@ class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
             print("Error en el comando ingresado")
             return "Error en el comando ingresado"
     
+
     def do_setangularmotor1(self,parametros):
         'Setear velocidad, sentido y angulo del motor1: SETANGULARMOTOR1 VEL(num) HOR/ANTH(str) ANG(num)'
         self.cdadOrdenes+=1
@@ -97,6 +97,7 @@ class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
             print("Error en el comando ingresado")
             return "Error en el comando ingresado"
     
+
     def do_setangularmotor2(self,parametros):
         'Setear velocidad, sentido y angulo del motor2: SETANGULARMOTOR2 VEL(num) HOR/ANTH(str) ANG(num)'
         self.cdadOrdenes+=1
@@ -110,6 +111,7 @@ class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
             print("Error en el comando ingresado")
             return "Error en el comando ingresado"
     
+
     def do_setangularmotor3(self,parametros):
         'Setear velocidad, sentido y angulo del motor3: SETANGULARMOTOR3 VEL(num) HOR/ANTH(str) ANG(num)'
         self.cdadOrdenes+=1
@@ -122,6 +124,7 @@ class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
         except Exception:
             print("Error en el comando ingresado")
             return "Error en el comando ingresado"
+
 
     def do_setposicionlineal(self,parametros):
         'Setear posicion y velocidad del robot: SETPOSICIONLINEAL X Y Z VEL'
@@ -136,7 +139,7 @@ class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
             return mensaje
         except serial.serialutil.PortNotOpenError as e:
             print("El puerto serie no se encuentra abierto.Ejecute TURNONPORT")
-            return "El puerto serie no se encuentra abierto"
+            return "El puerto serie no se encuentra abierto.Ejecute TURNONPORT"
         except Exception:
             print("Error en el comando ingresado")
             return "Error en el comando ingresado"
@@ -170,18 +173,25 @@ class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
             return "El puerto serie no se encuentra abierto"
 
 
-    def do_exit(self,arg):
+    def do_exit(self,*arg):
         'Salir de la consola: EXIT'
-        self.cdadOrdenes+=1
+        #Primero, si el archivo de modo manual sigue abierto lo cerramos
+        self.controlRobot.cerrarArchivo()
+        #Cerramos el servidor
+        self.do_svstatus_switch("off")
         print("Saliendo de la consola...")
-        time.sleep(1)
-        sys.exit()
+        exit()
+        
     
     #Getter que llamare luego desde el servidor a peticion del cliente
 
-    def getOrdenes(self):
+    def getnumOrdenes(self):
         return self.cdadOrdenes
+    
+    #Metodo para cerrar el archivo. Esto para que el cliente tambien pueda acceder y cerrar el archivo
 
+    def cerrarArchivo(self):
+        self.controlRobot.cerrarArchivo()
 
 
     #Metodos para el manejo de la consola
@@ -206,14 +216,14 @@ class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
         #Creamos una pequeña animacion para el servidor antes de que se inicie
 
         #HABILITAR AL TERMINAR CODIGO
-        print("Iniciando...")
+        """print("Iniciando...")
         time.sleep(1)
         for i in range(0,101):
             time.sleep(0.05)
             print("Cargando consola IU Server...[%d%%]" % i, end="\r")
         print("Cargando consola IU Server...[100%]")
         time.sleep(0.5)
-        
+        """
         print("\n\n**********Bienvenido a Veneris Server ®**********\n")
         time.sleep(0.5)
         self.do_svstatus_switch("on") #Para iniciar el servidor por defecto

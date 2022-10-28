@@ -16,9 +16,8 @@ class Servidor(object):
     puertoRPC = 8891  # Definimos un puerto. Puede ser cualquiera, simpre y cuando este libre en el host
     
     # Definimos el constructor
-    def __init__(self, Robot,Consola, port=puertoRPC): #Por defecto se establece puerto 
+    def __init__(self,Consola, port=puertoRPC): #Por defecto se establece puerto 
         # Con self.objeto_vinculado establecemnos la relacion entre la interfaz y el servicio. En este caso el framework de Arduino
-        self.Robot = Robot
         self.puerto = port
         self.consola=Consola
         while True:
@@ -42,8 +41,8 @@ class Servidor(object):
                     raise
         
         #Aca, dentro del mismo constructor, registramos las funciones a ser llamadas por el cliente
-        self.server.register_function(self.do_modoManual, "do_modoManual")
-        self.server.register_function(self.do_modoAutomatico, "do_modoAutomatico")
+        self.server.register_function(self.do_modoManual, "modomanual")
+        self.server.register_function(self.do_modoAutomatico, "modoautomatico")
         self.server.register_function(self.do_turnONPort,"turnonport")
         self.server.register_function(self.do_turnOFFPort,"turnoffport")
         self.server.register_function(self.do_setMotores,"setmotores")
@@ -53,8 +52,9 @@ class Servidor(object):
         self.server.register_function(self.do_setAngularMotor3,"setangularmotor3")
         self.server.register_function(self.do_setPinza,"setpinza")
         self.server.register_function(self.do_Reset,"reset")
-        self.server.register_function(self.getOrdenes,"getOrdenes")
-
+        self.server.register_function(self.getnumOrdenes,"getnumordenes")
+        self.server.register_function(self.cerrarArchivo,"cerrararchivo")
+        self.server.register_function(self.getComandos,"getcomandos")
 
     #Funciones para el iniciar y cerrar el servidor
 
@@ -97,40 +97,51 @@ class Servidor(object):
     
     #Funcion para mover el brazo a un punto determinado linealmente
     
-    def do_setPosicionLineal(self,parametros):
-
+    def do_setPosicionLineal(self,coordX,coordY,coordZ,velocidad):
+        parametros=str(coordX)+" "+str(coordY)+" "+str(coordZ)+" "+str(velocidad)
         return self.consola.do_setposicionlineal(parametros)
     
     #Funcion para controlar de manera angular el Motor1 del robot
 
-    def do_setAngularMotor1(self,parametros):
-
+    def do_setAngularMotor1(self,velocidad,sentido,angulo):
+        parametros=str(velocidad)+" "+str(sentido)+" "+str(angulo)
         return self.consola.do_setangularmotor1(parametros)
     
     #Funcion para controlar de manera angular el Motor2 del robot
-
-    def do_setAngularMotor2(self,parametros):
-
+    def do_setAngularMotor2(self,velocidad,sentido,angulo):
+        parametros=str(velocidad)+" "+str(sentido)+" "+str(angulo)
         return self.consola.do_setangularmotor2(parametros)
     
     #Funcion para controlar de manera angular el Motor3 del robot
     
-    def do_setAngularMotor3(self,parametros):
-
+    def do_setAngularMotor3(self,velocidad,sentido,angulo):
+        parametros=str(velocidad)+" "+str(sentido)+" "+str(angulo)
         return self.consola.do_setangularmotor3(parametros)
+    
+    #Funcion para controlar la apertura y cierre de la pinza del robot
     
     def do_setPinza(self,estado):
 
         return self.consola.do_setpinza(estado)
+    
+    #Funcion para resetear el robot (hacer HOMING)
 
     def do_Reset(self):
 
         return self.consola.do_reset()
     
-    #Definimos el getter por el cual vamos a obtener la cantidad de ordenes solicitadas, tanto por el
-    #cliente como por el servidor
-    def getOrdenes(self):
-        return self.consola.getOrdenes()
+    #Definimos el getters solo accesibles mediante el servidor
+    def getnumOrdenes(self):
+        return self.consola.getnumOrdenes()
+    
+    #Metodo para cerrar el archivo de modo manual, para que el cliente lo pueda cerrar remotamente
+    def cerrarArchivo(self):
+        self.consola.controlRobot.cerrarArchivo()
+        return 0
+    
+    def getComandos(self):
+        listacomandos=["modomanual","modoautomatico","turnonport","turnoffport","setmotores","setposicionlineal","setangularmotor1","setangularmotor2","setangularmotor3","setpinza","reset"]
+        return listacomandos
     
 
     

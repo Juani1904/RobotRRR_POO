@@ -30,28 +30,29 @@ class RobotRRR:
             
     #Metodos para activar el modo manual (aprendizaje o no) y el modo automatico
 
-    def modoManual(self,nombreexterno=None):
+    def modoManual(self,nombreexterno=""):
         #Si el nombre externo es distinto de None, significa que se esta llamando desde el Cliente
         #Si el nombre externo es None, significa que se esta llamando desde el servidor
-
         #Caso cliente. Si o si entraria en modo aprendizaje, porque si no llamaria a las funciones por otro lado.
-        if nombreexterno!=None:
+        #Caso cliente
+        if (nombreexterno != ""):
             self.nombreArchivo=nombreexterno+".txt"
         #Caso servidor
-        elif nombreexterno==None:
+        elif (nombreexterno==""):
             print("Ingrese NOMBRE del archivo .txt a crear con los comandos: ", end="")
             self.nombreArchivo=input()+".txt"
-        #Luego
         self.modo="aprendizaje"
         self.file=open(self.nombreArchivo,"w")
         return "INFO: MODO MANUAL(APRENDIZAJE) ACTIVADO"
 
-    def modoAutomatico(self,nombreexterno=None):
+    def modoAutomatico(self,nombreexterno=""):
+        #Primero, si el archivo de modo manual sigue abierto lo cerramos
+        self.cerrarArchivo()
         #El modo automatico solo sera valido cuando el archivo de comandos exista, y cuando no este vacio
         #Si no se entrara directamente a modo manual
-        if nombreexterno!=None:
+        if (nombreexterno!=""):
             self.nombreArchivo=nombreexterno+".txt"
-        elif nombreexterno==None:
+        elif (nombreexterno==""):
             print("Ingrese NOMBRE del archivo .txt que contiene los comandos: ", end="")
             self.nombreArchivo=input()+".txt"
         try:
@@ -69,16 +70,16 @@ class RobotRRR:
                 time.sleep(2)
             #Cerramos el puerto serie
             self.turnOFFPort()
-            #Luego volvemos al loop del CLI sv
-            print("Actividad automatica finalizada. Entrando a modo manual...") #Para el CLI del servidor
-            self.modoManual()
+            #Retornamos un mensaje al cliente
+            return "INFO: SECUENCIA AUTOMATICA FINALIZADA"
         except FileNotFoundError as e:
             if e.errno==2:
                 print("Archivo no encontrado.Entra a modo manual")
-                self.modoManual()
+                return "Archivo no encontrado."
+                
         except os.stat(self.nombreArchivo).st_size==0:
-            print("Archivo vacio. Entra a modo manual")
-            self.modoManual()
+            print("Archivo vacio.")
+            return "Archivo vacio."
 
 
     #Metodos de control del puerto serie y robot
@@ -164,7 +165,7 @@ class RobotRRR:
         while(self.Arduino.in_waiting>0): 
             return self.Arduino.readlines()
         
-
+    #Para realizar el HOMING del robot    
     def Reset(self): #Tambien llamado Homing. Sirve para que el brazo vuelva a su posicion de origen/descanso
 
         self.Arduino.write(b"G28\r\n")
@@ -173,7 +174,14 @@ class RobotRRR:
         time.sleep(2)
         while(self.Arduino.in_waiting>0): 
             return self.Arduino.readlines()
-        
+    
+
+    #Este metodo lo implementamos para que el cliente cuando cierre su CLI pueda cerrar el archivo para ejecutarlo
+    def cerrarArchivo(self):
+        if self.file!=None:
+            self.file.close()
+            self.file=None
+            
 
 
 
