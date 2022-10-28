@@ -55,7 +55,8 @@ class Servidor(object):
         self.server.register_function(self.getnumOrdenes,"getnumordenes")
         self.server.register_function(self.cerrarArchivoExterno,"cerrararchivoexterno")
         self.server.register_function(self.getComandos,"getcomandos")
-
+        self.server.register_function(self.getlistaOrdenes,"getlistaordenes")
+        
     #Funciones para el iniciar y cerrar el servidor
 
     def run_server(self):
@@ -130,9 +131,12 @@ class Servidor(object):
 
         return self.consola.do_reset()
     
-    #Definimos el getters solo accesibles mediante el servidor
+    #Definimos los getters solo accesibles mediante el servidor
     def getnumOrdenes(self):
         return self.consola.getnumOrdenes()
+    
+    def getlistaOrdenes(self):
+        return self.consola.getlistaOrdenes()
     
     #Metodo para cerrar el archivo de modo manual, para que el cliente lo pueda cerrar remotamente
     def cerrarArchivoExterno(self):

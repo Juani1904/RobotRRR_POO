@@ -6,6 +6,7 @@ class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
     exit=True
     cdadOrdenes=0 #Con este atributo llevaremos la cuenta de cuantas operaciones se le pide al robot
     #Tanto desde el CLI del servidor como el del cliente
+    listaOrdenes=[] #Con este atributo lista, vamos a introducir los nombres de las ordenes solicitadas, para mandarlas junto con cdadOrdenes
     #Los "atributos" que vamos a setear aca son realmente metodos de la clase Cmd (ejemplo Cmd.intro(string))
     intro=""
     prompt="V>>"
@@ -25,6 +26,7 @@ class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
     def do_svstatus_switch(self,estado):
         'Abrir o Cerrar el servidor: SVSTATUS_SWITCH ON/OFF'
         self.cdadOrdenes+=1
+        self.listaOrdenes.append("SVSTATUS_SWITCH"+" "+estado.upper())
         if estado =="on":
             # Se lanza el servidor en un hilo de control mediante Thread
             #Instanciamos el objeto thread
@@ -38,18 +40,21 @@ class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
     def do_modomanual(self,nombreexterno=""):
         'Pasar a modo manual: MODOMANUAL'
         self.cdadOrdenes+=1
+        self.listaOrdenes.append("MODOMANUAL")
         return self.controlRobot.modoManual(nombreexterno)
 
 
     def do_modoautomatico(self,nombreexterno=None):
         'Pasar a modo automatico: MODOAUTOMATICO'
         self.cdadOrdenes+=1
+        self.listaOrdenes.append("MODOAUTOMATICO")
         return self.controlRobot.modoAutomatico(nombreexterno)
     
     
     def do_turnonport(self,arg=None):
         'Activar el puerto serie: TURNONPORT'
         self.cdadOrdenes+=1
+        self.listaOrdenes.append("TURNONPORT")
         try:
             mensaje=""
             listamensaje=self.controlRobot.turnONPort()
@@ -66,12 +71,14 @@ class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
     def do_turnoffport(self,arg=None):
         'Deshabilita puerto serie: TURNOFFPORT'
         self.cdadOrdenes+=1
+        self.listaOrdenes.append("TURNOFFPORT")
         mensaje=self.controlRobot.turnOFFPort()
         return mensaje
     
     def do_setmotores(self,estado):
         "Activacion/Desactivacion de los motores del robot: SETMOTORES ON/OFF"
         self.cdadOrdenes+=1
+        self.listaOrdenes.append("SETMOTORES"+" "+estado.upper())
         try:
             mensaje=self.controlRobot.setMotores(estado)
             return mensaje
@@ -86,6 +93,7 @@ class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
     def do_setangularmotor1(self,parametros):
         'Setear velocidad, sentido y angulo del motor1: SETANGULARMOTOR1 VEL(num) HOR/ANTH(str) ANG(num)'
         self.cdadOrdenes+=1
+        self.listaOrdenes.append("SETANGULARMOTOR1"+" "+parametros)
         try:
             velocidad,sentido,angulo=parametros.split()
             return self.controlRobot.setAngularMotor1(velocidad,sentido,angulo)
@@ -100,6 +108,7 @@ class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
     def do_setangularmotor2(self,parametros):
         'Setear velocidad, sentido y angulo del motor2: SETANGULARMOTOR2 VEL(num) HOR/ANTH(str) ANG(num)'
         self.cdadOrdenes+=1
+        self.listaOrdenes.append("SETANGULARMOTOR2"+" "+parametros)
         try:
             velocidad,sentido,angulo=parametros.split()
             return self.controlRobot.setAngularMotor2(velocidad,sentido,angulo)
@@ -114,6 +123,7 @@ class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
     def do_setangularmotor3(self,parametros):
         'Setear velocidad, sentido y angulo del motor3: SETANGULARMOTOR3 VEL(num) HOR/ANTH(str) ANG(num)'
         self.cdadOrdenes+=1
+        self.listaOrdenes.append("SETANGULARMOTOR3"+" "+parametros)
         try:
             velocidad,sentido,angulo=parametros.split()
             return self.controlRobot.setAngularMotor3(velocidad,sentido,angulo)
@@ -128,6 +138,7 @@ class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
     def do_setposicionlineal(self,parametros):
         'Setear posicion y velocidad del robot: SETPOSICIONLINEAL X Y Z VEL'
         self.cdadOrdenes+=1
+        self.listaOrdenes.append("SETPOSICIONLINEAL"+" "+parametros)
         try:
             coordX,coordY,coordZ,velocidad=parametros.split()
             mensaje=""
@@ -147,6 +158,7 @@ class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
     def do_setpinza(self,estado):
         'Habilitacion de pinza/gripper: SETPINZA ON/OFF'
         self.cdadOrdenes+=1
+        self.listaOrdenes.append("SETPINZA"+" "+estado.upper())
         try:
             mensaje=""
             listamensaje=self.controlRobot.setPinza(estado)
@@ -165,6 +177,7 @@ class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
     def do_reset(self,arg=None):
         'Resetea al RobotRRR a su posicion inicial: RESET'
         self.cdadOrdenes+=1
+        self.listaOrdenes.append("RESET")
         try:
             mensaje=""
             listamensaje=self.controlRobot.Reset()
@@ -188,10 +201,13 @@ class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
         exit()
         
     
-    #Getter que llamare luego desde el servidor a peticion del cliente
+    #Getters que llamare luego desde el servidor a peticion del cliente
 
     def getnumOrdenes(self):
         return self.cdadOrdenes
+    
+    def getlistaOrdenes(self):
+        return self.listaOrdenes
     
     #Metodos para cerrar los archivos
 

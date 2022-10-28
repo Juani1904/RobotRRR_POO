@@ -267,11 +267,18 @@ int main(){
                 //Aca hay que hacer algo para que me diga si el servidor esta conectado o no
                 //Aca hay que hacer algo para saber si el puerto serie esta conectado o no
                 //Para obtener el numero de operaciones solicitadas
-                XmlRpcValue noArg,result;
-                Cliente.execute("getnumordenes",noArg,result);
-                cout<<"El numero de ordenes solicitadas hasta el momento es: "<<result<<"\n\n";
+                XmlRpcValue noArg1,result1;
+                Cliente.execute("getnumordenes",noArg1,result1);
+                cout<<"El numero de ordenes solicitadas hasta el momento es: "<<result1<<"\n\n";
+                //Ahora vamos a mostrar las ordenes ejecutadas
+                cout<<"Los comandos o ordenes solicitadas fueron: "<<endl;
+                XmlRpcValue noArg2,result2;
+                Cliente.execute("getlistaordenes",noArg2,result2);
+                cout<<"\n\n";
+                for(int i=0;i<result2.size();i++){
+                    cout<<result2[i]<<"\n\n";
                     }
-
+                }
             break;
             case 13: {
                 comandos(Cliente);
@@ -311,20 +318,3 @@ int main(){
 
 }
 
-/*
-cout<<"\n======================================================================";
-    cout<<"1.Modo Manual"<<endl;
-    cout<<"2.Modo Automatico"<<endl;
-    cout<<"3.Habilitar puerto serie"<<endl;
-    cout<<"4.Deshabilitar puerto serie"<<endl;
-    cout<<"5.Activar/Desactivar motores robot"<<endl;
-    cout<<"6.Establecer una posicion y velocidad para trayectoria lineal"<<endl;
-    cout<<"7.Establecer velocidad,sentido y angulo para trayectoria circular del motor 1"<<endl;
-    cout<<"8.Establecer velocidad,sentido y angulo para trayectoria circular del motor 2"<<endl;
-    cout<<"9.Establecer velocidad,sentido y angulo para trayectoria circular del motor 3"<<endl;
-    cout<<"10.Activar/Desactivar el Gripper(Pinza)"<<endl;
-    cout<<"11.Reset (Homing)"<<endl;
-    cout<<"12.Obtener parametros"<<endl;
-    cout<<"13.Exit"<<endl;
-    cout<<"\n=======================================================================";
-*/
