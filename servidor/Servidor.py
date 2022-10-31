@@ -157,15 +157,15 @@ class Servidor(object):
     def getEstadoPuertoSerie(self):
         return self.consola.getEstadoPuertoSerie()
     
-
+    def getComandos(self):
+        listacomandos=["modomanual","modoautomatico","turnonport","turnoffport","setmotores","setposicionlineal","setangularmotor1","setangularmotor2","setangularmotor3","setpinza","reset"]
+        return listacomandos
     
     def cerrarArchivoExterno(self):
         self.consola.controlRobot.cerrarArchivoExterno()
         return 0
     
-    def getComandos(self):
-        listacomandos=["modomanual","modoautomatico","turnonport","turnoffport","setmotores","setposicionlineal","setangularmotor1","setangularmotor2","setangularmotor3","setpinza","reset"]
-        return listacomandos
+    
     
 
     
