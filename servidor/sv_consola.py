@@ -217,7 +217,6 @@ class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
     def getEstadoPuertoSerie(self):
         if(self.controlRobot.Arduino.isOpen() ==True):
             tiempoinicial=str(self.actividadInicial)
-            print(tiempoinicial)
             return "Robot activo\n"+"Inicio de actividad-> "+tiempoinicial
         else:
             return "Robot inactivo"
