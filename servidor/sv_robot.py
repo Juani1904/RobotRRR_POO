@@ -78,6 +78,7 @@ class RobotRRR:
                     continue #Se queda en loop hasta que no haya nada en el buffer de entrada
 
                 #Ahora mandamos al Arduino cada elemento de lista
+                listacmd=""
                 for comando in listadelectura:
                     self.Arduino.write(bytes(comando,encoding='UTF-8').strip()) #Con strip me aseguro de eliminar los \t
                     time.sleep(2)
@@ -132,7 +133,6 @@ class RobotRRR:
         time.sleep(2)
         while(self.Arduino.in_waiting>0): 
             return self.Arduino.readlines()
-        return "INFO: ROBOT ONLINE"
         
             
 
@@ -187,7 +187,7 @@ class RobotRRR:
             return f"INFO: Valores seteados. Velocidad: {velocidad} mm/s, Sentido: {sentido}, Angulo: {angulo} grados"
         if self.Arduino.isOpen()==False:
             print("El puerto serie no se encuentra abierto.Ejecute TURNONPORT")
-            return "El puerto serie no se encuentra abierto."
+            return "El puerto serie no se encuentra abierto.Ejecute TURNONPORT"
         
         
         
@@ -198,7 +198,7 @@ class RobotRRR:
             return f"INFO: Valores seteados. Velocidad: {velocidad} mm/s, Sentido: {sentido}, Angulo: {angulo} grados"
         if self.Arduino.isOpen()==False:
             print("El puerto serie no se encuentra abierto.Ejecute TURNONPORT")
-            return "El puerto serie no se encuentra abierto."
+            return "El puerto serie no se encuentra abierto.Ejecute TURNONPORT"
         
 
     def setAngularMotor3(self,velocidad:float,sentido:str,angulo:float):
@@ -207,7 +207,7 @@ class RobotRRR:
             return f"INFO: Valores seteados. Velocidad: {velocidad} mm/s, Sentido: {sentido}, Angulo: {angulo} grados"
         if self.Arduino.isOpen()==False:
             print("El puerto serie no se encuentra abierto.Ejecute TURNONPORT")
-            return "El puerto serie no se encuentra abierto."
+            return "El puerto serie no se encuentra abierto.Ejecute TURNONPORT"
         
 
     #Para abrir o cerrar la pinza (gripper) [Actividad del efector final]

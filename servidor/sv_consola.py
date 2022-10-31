@@ -2,11 +2,12 @@ from cmd import Cmd
 from threading import Thread
 import time
 import serial
+import datetime
 class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
-    exit=True
     cdadOrdenes=0 #Con este atributo llevaremos la cuenta de cuantas operaciones se le pide al robot
     #Tanto desde el CLI del servidor como el del cliente
     listaOrdenes=[] #Con este atributo lista, vamos a introducir los nombres de las ordenes solicitadas, para mandarlas junto con cdadOrdenes
+    actividadInicial=None
     #Los "atributos" que vamos a setear aca son realmente metodos de la clase Cmd (ejemplo Cmd.intro(string))
     intro=""
     prompt="V>>"
@@ -25,8 +26,6 @@ class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
     
     def do_svstatus_switch(self,estado):
         'Abrir o Cerrar el servidor: SVSTATUS_SWITCH ON/OFF'
-        self.cdadOrdenes+=1
-        self.listaOrdenes.append("SVSTATUS_SWITCH"+" "+estado.upper())
         if estado =="on":
             # Se lanza el servidor en un hilo de control mediante Thread
             #Instanciamos el objeto thread
@@ -36,6 +35,7 @@ class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
         elif estado =="off":
             self.servidor.shutdown()
             print("Servidor RPC en el puerto [%s] fue cerrado" % str(self.servidor.server.server_address))
+            
 
     def do_modomanual(self,nombreexterno=""):
         'Pasar a modo manual: MODOMANUAL'
@@ -53,9 +53,13 @@ class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
     
     def do_turnonport(self,arg=None):
         'Activar el puerto serie: TURNONPORT'
-        self.cdadOrdenes+=1
-        self.listaOrdenes.append("TURNONPORT")
+        
         try:
+            #Esto es para tomar la hora de la primera actividad
+            if (self.actividadInicial==None):
+                self.actividadInicial=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            self.cdadOrdenes+=1
+            self.listaOrdenes.append("TURNONPORT")
             mensaje=""
             listamensaje=self.controlRobot.turnONPort()
             for elemento in listamensaje:
@@ -77,9 +81,10 @@ class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
     
     def do_setmotores(self,estado):
         "Activacion/Desactivacion de los motores del robot: SETMOTORES ON/OFF"
-        self.cdadOrdenes+=1
-        self.listaOrdenes.append("SETMOTORES"+" "+estado.upper())
+        
         try:
+            self.cdadOrdenes+=1
+            self.listaOrdenes.append("SETMOTORES"+" "+estado.upper())
             mensaje=self.controlRobot.setMotores(estado)
             return mensaje
         except serial.serialutil.PortNotOpenError:
@@ -92,9 +97,9 @@ class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
 
     def do_setangularmotor1(self,parametros):
         'Setear velocidad, sentido y angulo del motor1: SETANGULARMOTOR1 VEL(num) HOR/ANTH(str) ANG(num)'
-        self.cdadOrdenes+=1
-        self.listaOrdenes.append("SETANGULARMOTOR1"+" "+parametros)
         try:
+            self.cdadOrdenes+=1
+            self.listaOrdenes.append("SETANGULARMOTOR1"+" "+parametros)
             velocidad,sentido,angulo=parametros.split()
             return self.controlRobot.setAngularMotor1(velocidad,sentido,angulo)
         except serial.serialutil.PortNotOpenError as e:
@@ -107,9 +112,9 @@ class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
 
     def do_setangularmotor2(self,parametros):
         'Setear velocidad, sentido y angulo del motor2: SETANGULARMOTOR2 VEL(num) HOR/ANTH(str) ANG(num)'
-        self.cdadOrdenes+=1
-        self.listaOrdenes.append("SETANGULARMOTOR2"+" "+parametros)
         try:
+            self.cdadOrdenes+=1
+            self.listaOrdenes.append("SETANGULARMOTOR2"+" "+parametros)
             velocidad,sentido,angulo=parametros.split()
             return self.controlRobot.setAngularMotor2(velocidad,sentido,angulo)
         except serial.serialutil.PortNotOpenError as e:
@@ -122,9 +127,9 @@ class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
 
     def do_setangularmotor3(self,parametros):
         'Setear velocidad, sentido y angulo del motor3: SETANGULARMOTOR3 VEL(num) HOR/ANTH(str) ANG(num)'
-        self.cdadOrdenes+=1
-        self.listaOrdenes.append("SETANGULARMOTOR3"+" "+parametros)
         try:
+            self.cdadOrdenes+=1
+            self.listaOrdenes.append("SETANGULARMOTOR3"+" "+parametros)
             velocidad,sentido,angulo=parametros.split()
             return self.controlRobot.setAngularMotor3(velocidad,sentido,angulo)
         except serial.serialutil.PortNotOpenError as e:
@@ -137,9 +142,9 @@ class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
 
     def do_setposicionlineal(self,parametros):
         'Setear posicion y velocidad del robot: SETPOSICIONLINEAL X Y Z VEL'
-        self.cdadOrdenes+=1
-        self.listaOrdenes.append("SETPOSICIONLINEAL"+" "+parametros)
         try:
+            self.cdadOrdenes+=1
+            self.listaOrdenes.append("SETPOSICIONLINEAL"+" "+parametros)
             coordX,coordY,coordZ,velocidad=parametros.split()
             mensaje=""
             listamensaje=self.controlRobot.setPosicionLineal(coordX,coordY,coordZ,velocidad)
@@ -157,9 +162,9 @@ class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
 
     def do_setpinza(self,estado):
         'Habilitacion de pinza/gripper: SETPINZA ON/OFF'
-        self.cdadOrdenes+=1
-        self.listaOrdenes.append("SETPINZA"+" "+estado.upper())
         try:
+            self.cdadOrdenes+=1
+            self.listaOrdenes.append("SETPINZA"+" "+estado.upper())
             mensaje=""
             listamensaje=self.controlRobot.setPinza(estado)
             for elemento in listamensaje:
@@ -176,9 +181,9 @@ class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
     
     def do_reset(self,arg=None):
         'Resetea al RobotRRR a su posicion inicial: RESET'
-        self.cdadOrdenes+=1
-        self.listaOrdenes.append("RESET")
         try:
+            self.cdadOrdenes+=1
+            self.listaOrdenes.append("RESET")
             mensaje=""
             listamensaje=self.controlRobot.Reset()
             for elemento in listamensaje:
@@ -208,6 +213,15 @@ class Consola(Cmd): #Creamos una clase Consola que hereda de la clase Cmd
     
     def getlistaOrdenes(self):
         return self.listaOrdenes
+    
+    def getEstadoPuertoSerie(self):
+        if(self.controlRobot.Arduino.isOpen() ==True):
+            tiempoinicial=str(self.actividadInicial)
+            print(tiempoinicial)
+            return "Robot activo\n"+"Inicio de actividad-> "+tiempoinicial
+        else:
+            return "Robot inactivo"
+    
     
     #Metodos para cerrar los archivos
 

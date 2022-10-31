@@ -9,11 +9,13 @@ import socket
 
 class Servidor(object):
     server = None
+    quit=0
     """
     Como servidor no se ha especificado a ninguno en particular, porque en el lanzamiento (instanciacion
     de self.server) le pasaremos todo
     """
     puertoRPC = 8891  # Definimos un puerto. Puede ser cualquiera, simpre y cuando este libre en el host
+
     
     # Definimos el constructor
     def __init__(self,Consola, port=puertoRPC): #Por defecto se establece puerto 
@@ -26,7 +28,7 @@ class Servidor(object):
                 del objeto self.server, debido a que es la que me crea el vinculo entre mi clase
                 interfaz XmlRpcEjemploserver con el servidor propiamente dicho (clase servidor SimpleXMLRPCServer)
                 """
-                self.server = SimpleXMLRPCServer(("localhost", self.puerto), allow_none=True)
+                self.server = SimpleXMLRPCServer(("192.168.100.6", self.puerto), allow_none=True)
                 if self.puerto != port:
                     print("Servidor RPC ubicado en puerto no estandar [%d]" % self.puerto)
                 break
@@ -56,16 +58,18 @@ class Servidor(object):
         self.server.register_function(self.cerrarArchivoExterno,"cerrararchivoexterno")
         self.server.register_function(self.getComandos,"getcomandos")
         self.server.register_function(self.getlistaOrdenes,"getlistaordenes")
-        
+        self.server.register_function(self.getEstadoPuertoSerie,"getestadopuertoserie")
     #Funciones para el iniciar y cerrar el servidor
 
     def run_server(self):
-        
+
         self.server.serve_forever()
 
     def shutdown(self):
+
         self.server.shutdown()
         self.thread.join()
+    
 
     #Funcion para iniciar el modo manual o de aprendizaje
   
@@ -105,17 +109,29 @@ class Servidor(object):
     #Funcion para controlar de manera angular el Motor1 del robot
 
     def do_setAngularMotor1(self,velocidad,sentido,angulo):
+        if (sentido==-1):
+            sentido="anth"
+        elif (sentido==1):
+            sentido="hor"
         parametros=str(velocidad)+" "+str(sentido)+" "+str(angulo)
         return self.consola.do_setangularmotor1(parametros)
     
     #Funcion para controlar de manera angular el Motor2 del robot
     def do_setAngularMotor2(self,velocidad,sentido,angulo):
+        if (sentido==-1):
+            sentido="anth"
+        elif (sentido==1):
+            sentido="hor"
         parametros=str(velocidad)+" "+str(sentido)+" "+str(angulo)
         return self.consola.do_setangularmotor2(parametros)
     
     #Funcion para controlar de manera angular el Motor3 del robot
     
     def do_setAngularMotor3(self,velocidad,sentido,angulo):
+        if (sentido==-1):
+            sentido="anth"
+        elif (sentido==1):
+            sentido="hor"
         parametros=str(velocidad)+" "+str(sentido)+" "+str(angulo)
         return self.consola.do_setangularmotor3(parametros)
     
@@ -131,14 +147,18 @@ class Servidor(object):
 
         return self.consola.do_reset()
     
-    #Definimos los getters solo accesibles mediante el servidor
+    #Definimos los getters y metodos solo accesibles mediante el cliente
     def getnumOrdenes(self):
         return self.consola.getnumOrdenes()
     
     def getlistaOrdenes(self):
         return self.consola.getlistaOrdenes()
     
-    #Metodo para cerrar el archivo de modo manual, para que el cliente lo pueda cerrar remotamente
+    def getEstadoPuertoSerie(self):
+        return self.consola.getEstadoPuertoSerie()
+    
+
+    
     def cerrarArchivoExterno(self):
         self.consola.controlRobot.cerrarArchivoExterno()
         return 0
